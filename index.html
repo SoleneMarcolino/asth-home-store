@@ -1,0 +1,312 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#102b55">
+<title>ASTH Home Store</title>
+<style>
+:root {
+  --azul:#102b55;
+  --bebe:#b9dcf5;
+  --branco:#ffffff;
+  --fundo:#f5f8fc;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--fundo);
+  color:#26364a;
+}
+header {
+  background:var(--branco);
+  text-align:center;
+  padding:25px 15px;
+  border-bottom:3px solid var(--bebe);
+}
+.logo {
+  font-family:Georgia,serif;
+  font-size:36px;
+  font-weight:bold;
+  color:var(--azul);
+}
+.logo span {
+  display:block;
+  font-family:cursive;
+  font-size:19px;
+  color:#83b9df;
+  font-weight:normal;
+}
+.slogan {
+  font-size:11px;
+  letter-spacing:2px;
+  color:var(--azul);
+  margin-top:8px;
+}
+nav {
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:12px;
+  background:var(--azul);
+}
+nav a {
+  color:white;
+  text-decoration:none;
+  padding:8px 12px;
+  font-size:13px;
+}
+.hero {
+  background:linear-gradient(135deg,#d9edfb,#ffffff);
+  text-align:center;
+  padding:45px 20px;
+}
+.hero h1 { color:var(--azul); font-size:27px; }
+.hero p { line-height:1.6; }
+section { padding:25px 16px; }
+h2 { color:var(--azul); text-align:center; }
+.search {
+  display:block;
+  width:100%;
+  max-width:500px;
+  margin:15px auto;
+  padding:13px;
+  border:1px solid #cbd8e5;
+  border-radius:9px;
+  font-size:15px;
+}
+.products {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+  gap:14px;
+  max-width:900px;
+  margin:auto;
+}
+.product {
+  background:white;
+  border-radius:12px;
+  padding:14px;
+  text-align:center;
+  box-shadow:0 2px 9px #0000000c;
+}
+.product img {
+  width:100%;
+  height:125px;
+  object-fit:cover;
+  border-radius:8px;
+  background:#edf4fa;
+}
+.product h3 { font-size:15px; color:var(--azul); }
+.price { font-weight:bold; color:#315f91; }
+button {
+  background:var(--azul);
+  color:white;
+  border:0;
+  border-radius:8px;
+  padding:11px 15px;
+  cursor:pointer;
+}
+button:hover { opacity:.9; }
+.secondary { background:#8bbfe5; color:#102b55; }
+.empty { text-align:center; padding:25px; color:#64748b; }
+.cart {
+  max-width:650px;
+  margin:auto;
+  background:white;
+  padding:18px;
+  border-radius:12px;
+}
+.cart-item {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid #eee;
+}
+form {
+  max-width:550px;
+  margin:20px auto;
+  display:grid;
+  gap:12px;
+}
+form input, form textarea {
+  padding:13px;
+  border:1px solid #ccd7e2;
+  border-radius:8px;
+  font:inherit;
+  width:100%;
+}
+footer {
+  text-align:center;
+  background:var(--azul);
+  color:white;
+  padding:25px 15px;
+  font-size:13px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⌂ ASTH
+    <span>Home Store</span>
+  </div>
+  <div class="slogan">SUA CASA, NOSSA PAIXÃO.</div>
+</header>
+
+<nav>
+  <a href="#inicio">Início</a>
+  <a href="#produtos">Produtos</a>
+  <a href="#promocoes">Promoções</a>
+  <a href="#carrinho">Carrinho (<span id="cart-count">0</span>)</a>
+  <a href="#contactos">Contactos</a>
+</nav>
+
+<main>
+<section class="hero" id="inicio">
+  <h1>Bem-vindo à ASTH Home Store!</h1>
+  <p>Tudo pensado para tornar a sua casa ainda mais especial.</p>
+  <a href="#produtos"><button>Explorar produtos</button></a>
+</section>
+
+<section id="produtos">
+  <h2>O nosso catálogo</h2>
+  <input class="search" id="search" placeholder="Pesquisar produtos..." oninput="renderProducts()">
+  <div class="products" id="product-list"></div>
+</section>
+
+<section id="promocoes">
+  <h2>Promoções especiais</h2>
+  <p class="empty">Em breve, novidades e preços especiais para si!</p>
+</section>
+
+<section id="carrinho">
+  <h2>O meu carrinho</h2>
+  <div class="cart">
+    <div id="cart-items" class="empty">O seu carrinho está vazio.</div>
+    <h3>Total: <span id="total">0</span> Kz</h3>
+    <button onclick="checkout()">Continuar encomenda</button>
+  </div>
+</section>
+
+<section id="contactos">
+  <h2>Faça a sua encomenda</h2>
+  <form id="order-form" onsubmit="sendOrder(event)">
+    <input id="customer" placeholder="Nome completo" required>
+    <input id="phone" type="tel" placeholder="Número de telefone" required>
+    <textarea id="address" placeholder="Morada de entrega" required></textarea>
+    <label>Data preferida de entrega:</label>
+    <input id="delivery" type="date" required>
+    <button type="submit">Preparar encomenda</button>
+  </form>
+  <p class="empty">ASTH Home Store — Angola</p>
+</section>
+</main>
+
+<footer>
+  <strong>ASTH Home Store</strong>
+  <p>SUA CASA, NOSSA PAIXÃO.</p>
+</footer>
+
+<script>
+const products = [];
+let cart = [];
+
+function formatPrice(value) {
+  return value.toLocaleString("pt-PT");
+}
+
+function renderProducts() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const list = document.getElementById("product-list");
+  const filtered = products.filter(p => p.name.toLowerCase().includes(search));
+
+  if (!filtered.length) {
+    list.innerHTML = '<p class="empty">Estamos a preparar o nosso catálogo. Volte em breve!</p>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(p => `
+    <article class="product">
+      <img src="${p.image || ''}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <p class="price">${formatPrice(p.price)} Kz</p>
+      <button onclick="addToCart('${p.id}')">Adicionar ao carrinho</button>
+    </article>
+  `).join("");
+}
+
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  const item = cart.find(p => p.id === id);
+  if (item) item.quantity++;
+  else cart.push({...product, quantity:1});
+  renderCart();
+}
+
+function renderCart() {
+  const area = document.getElementById("cart-items");
+  const count = cart.reduce((sum,p) => sum + p.quantity, 0);
+  const total = cart.reduce((sum,p) => sum + p.price*p.quantity, 0);
+
+  document.getElementById("cart-count").textContent = count;
+  document.getElementById("total").textContent = formatPrice(total);
+
+  if (!cart.length) {
+    area.innerHTML = "O seu carrinho está vazio.";
+    area.className = "empty";
+    return;
+  }
+
+  area.className = "";
+  area.innerHTML = cart.map(p => `
+    <div class="cart-item">
+      <span>${p.name} × ${p.quantity}</span>
+      <strong>${formatPrice(p.price*p.quantity)} Kz</strong>
+      <button class="secondary" onclick="removeItem('${p.id}')">×</button>
+    </div>
+  `).join("");
+}
+
+function removeItem(id) {
+  cart = cart.filter(p => p.id !== id);
+  renderCart();
+}
+
+function checkout() {
+  if (!cart.length) {
+    alert("Adicione produtos ao carrinho primeiro.");
+    return;
+  }
+  document.getElementById("contactos").scrollIntoView({behavior:"smooth"});
+}
+
+function sendOrder(event) {
+  event.preventDefault();
+  if (!cart.length) {
+    alert("O carrinho está vazio.");
+    return;
+  }
+
+  const order = {
+    customer: document.getElementById("customer").value,
+    phone: document.getElementById("phone").value,
+    address: document.getElementById("address").value,
+    delivery: document.getElementById("delivery").value,
+    items: cart,
+    total: cart.reduce((sum,p) => sum + p.price*p.quantity, 0)
+  };
+
+  alert("Os dados foram preenchidos. Na próxima etapa vamos ligar as encomendas ao WhatsApp e à área de gestão da ASTH.");
+  console.log("Encomenda preparada:", order);
+}
+
+renderProducts();
+renderCart();
+</script>
+</body>
+  </html>
+  
