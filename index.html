@@ -212,7 +212,23 @@ footer {
 </footer>
 
 <script>
-const products = [];
+let products = [];
+
+async function loadProducts() {
+  const { data, error } = await supabaseClient
+    .from('products')
+    .select('id, name, description, price, image_url, is_promotion, is_available')
+    .eq('is_available', true);
+
+  if (error) {
+    console.error('Erro ao carregar produtos:', error);
+    return;
+  }
+
+  products = data;
+  renderProducts();
+}
+
 let cart = [];
 
 function formatPrice(value) {
@@ -220,7 +236,7 @@ function formatPrice(value) {
 }
 
 function renderProducts() {
-  const search = document.getElementById("search").value.toLowerCase();
+  const search = document.getElementById("search")?.value.toLowerCase() || "";
   const list = document.getElementById("product-list");
   const filtered = products.filter(p => p.name.toLowerCase().includes(search));
 
@@ -231,7 +247,7 @@ function renderProducts() {
 
   list.innerHTML = filtered.map(p => `
     <article class="product">
-      <img src="${p.image || ''}" alt="${p.name}">
+      <img src="${p.image_url || ''}" alt="${p.name}">
       <h3>${p.name}</h3>
       <p class="price">${formatPrice(p.price)} Kz</p>
       <button onclick="addToCart('${p.id}')">Adicionar ao carrinho</button>
@@ -318,6 +334,7 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+  loadProducts();
 </script>
   
 </body>
