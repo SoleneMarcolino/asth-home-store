@@ -1,1 +1,206 @@
 
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administração | ASTH Home Store</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --azul:#17365d;
+  --bebé:#d9edff;
+  --fundo:#f5f8fc;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--fundo);
+  color:#24364b;
+}
+header {
+  background:var(--azul);
+  color:white;
+  padding:22px;
+  text-align:center;
+}
+header h1 { margin:0; }
+header p { margin:7px 0 0; color:var(--bebé); }
+main { max-width:950px; margin:25px auto; padding:15px; }
+.card {
+  background:white;
+  padding:22px;
+  border-radius:12px;
+  margin-bottom:18px;
+  box-shadow:0 2px 10px #0000000d;
+}
+input,button {
+  width:100%;
+  padding:13px;
+  margin:7px 0;
+  border-radius:7px;
+  font-size:16px;
+}
+input { border:1px solid #ccd6e0; }
+button {
+  border:0;
+  background:var(--azul);
+  color:white;
+  font-weight:bold;
+}
+button.secondary { background:#d9edff; color:var(--azul); }
+.hidden { display:none; }
+.stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;
+}
+.stat {
+  background:var(--bebé);
+  padding:18px;
+  border-radius:10px;
+}
+.stat strong { display:block; font-size:25px; margin-top:8px; }
+table { width:100%; border-collapse:collapse; }
+th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
+.table-wrap { overflow-x:auto; }
+#message { color:#a12626; }
+</style>
+</head>
+<body>
+<header>
+  <h1>⌂ ASTH Home Store</h1>
+  <p>Painel de Administração</p>
+</header>
+
+<main>
+  <section id="login" class="card">
+    <h2>Acesso administrativo</h2>
+    <p>Entra com o teu e-mail e a palavra-passe de administradora.</p>
+    <input id="email" type="email" placeholder="E-mail">
+    <input id="password" type="password" placeholder="Palavra-passe">
+    <button onclick="login()">Entrar</button>
+    <p id="message"></p>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="card">
+      <h2>Bem-vinda à administração!</h2>
+      <p>ASTH Home Store — Sua casa, nossa paixão.</p>
+      <button class="secondary" onclick="logout()">Terminar sessão</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">Produtos<strong id="productCount">0</strong></div>
+      <div class="stat">Encomendas<strong id="orderCount">0</strong></div>
+      <div class="stat">Categorias<strong id="categoryCount">0</strong></div>
+    </div>
+
+    <div class="card">
+      <h2>Produtos</h2>
+      <button onclick="loadAdminData()">Actualizar dados</button>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Produto</th><th>Preço</th><th>Disponível</th></tr></thead>
+          <tbody id="productsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Encomendas</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <tbody id="ordersTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const SUPABASE_URL = "https://yipivcjqphceqtsfxpsl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_uztaOk3Mq4h6p46O_grDUg_ymdVKu30";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const message = document.getElementById("message");
+  message.textContent = "A verificar acesso...";
+
+  const { error } = await supabaseClient.auth.signInWithPassword({email,password});
+  if (error) {
+    message.textContent = "Não foi possível entrar. Confirma o e-mail e a palavra-passe.";
+    return;
+  }
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  const { data: admin, error: adminError } = await supabaseClient
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (adminError || !admin) {
+    await supabaseClient.auth.signOut();
+    message.textContent = "Esta conta não tem autorização de administradora.";
+    return;
+  }
+
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+  await loadAdminData();
+}
+
+async function loadAdminData() {
+  const [products, orders, categories] = await Promise.all([
+    supabaseClient.from("products").select("id,name,price,is_available"),
+    supabaseClient.from("orders").select("id,customer_name,total,status"),
+    supabaseClient.from("categories").select("id")
+  ]);
+
+  if (products.error || orders.error || categories.error) {
+    alert("Não foi possível carregar todos os dados. Verifica a ligação.");
+    return;
+  }
+
+  document.getElementById("productCount").textContent = products.data.length;
+  document.getElementById("orderCount").textContent = orders.data.length;
+  document.getElementById("categoryCount").textContent = categories.data.length;
+
+  document.getElementById("productsTable").innerHTML =
+    products.data.map(p => `
+      <tr>
+        <td>${escapeHTML(p.name)}</td>
+        <td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
+        <td>${p.is_available ? "Sim" : "Não"}</td>
+      </tr>
+    `).join("");
+
+  document.getElementById("ordersTable").innerHTML =
+    orders.data.map(o => `
+      <tr>
+        <td>${escapeHTML(o.customer_name || "")}</td>
+        <td>${Number(o.total || 0).toLocaleString("pt-PT")} Kz</td>
+        <td>${escapeHTML(o.status || "")}</td>
+      </tr>
+    `).join("");
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  location.reload();
+}
+</script>
+</body>
+</html>
+
