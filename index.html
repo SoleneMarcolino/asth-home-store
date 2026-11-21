@@ -517,10 +517,12 @@ function renderCart() {
 }
   
 
+
 function removeItem(id) {
-  cart = cart.filter(p => p.id !== id);
+  cart = cart.filter(p => String(p.id) !== String(id));
   renderCart();
 }
+  
 
 
 function changeQuantity(id, variation) {
