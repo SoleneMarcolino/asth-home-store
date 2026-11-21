@@ -219,7 +219,63 @@ footer {
 #consulta-resultado {
   margin-top: 20px;
   text-align: left;
+  
+.consulta-result-card {
+  background: #f5f8fc;
+  border: 1px solid #d9edff;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 15px;
+  color: var(--azul);
 }
+
+.consulta-result-card h3 {
+  margin: 0 0 15px;
+  color: var(--azul);
+  font-size: 18px;
+}
+
+.consulta-result-card .info {
+  padding: 10px 0;
+  border-bottom: 1px solid #d9edff;
+  font-size: 14px;
+}
+
+.consulta-result-card .status {
+  display: inline-block;
+  background: #fff0cc;
+  color: #8a5a00;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.consulta-result-card .total {
+  margin-top: 15px;
+  padding: 14px;
+  background: var(--azul);
+  color: white;
+  border-radius: 9px;
+  font-size: 17px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.consulta-result-card .produto {
+  padding: 10px 0;
+  border-bottom: 1px solid #d9edff;
+  font-size: 13px;
+}
+
+.consulta-result-card .comprovativo {
+  margin-top: 15px;
+  padding: 12px;
+  background: #eaf5ff;
+  border-radius: 8px;
+  font-size: 13px;
+}
+  
   
 </style>
 </head>
@@ -519,31 +575,63 @@ document.getElementById("consulta-form").addEventListener("submit", async functi
     return;
   }
 
-  let mensagem =
-    "ENCOMENDA ENCONTRADA!\n\n" +
-    "Referência: " + data.reference + "\n" +
-    "Cliente: " + data.customer_name + "\n" +
-    "Estado: " + data.status + "\n" +
-    "Pagamento: " + (data.payment_status || "Pendente") + "\n" +
-    "Total: " + Number(data.total).toLocaleString("pt-AO") + " Kz\n\n" +
-    "PRODUTOS:\n";
+  
+resultado.replaceChildren();
 
-  data.items.forEach(function(item) {
-    mensagem +=
-      item.product_name + " — " +
-      item.quantity + " x " +
-      Number(item.unit_price).toLocaleString("pt-AO") + " Kz\n";
-  });
+const card = document.createElement("div");
+card.className = "consulta-result-card";
 
-  mensagem += "\n";
+function adicionarTexto(tag, classe, texto, pai = card) {
+  const elemento = document.createElement(tag);
+  elemento.className = classe;
+  elemento.textContent = texto;
+  pai.appendChild(elemento);
+}
 
-  if (data.receipt_number) {
-    mensagem += "Comprovativo: " + data.receipt_number;
-  } else {
-    mensagem += "O comprovativo estará disponível após a confirmação do pagamento.";
-  }
+adicionarTexto("h3", "", "📦 Encomenda encontrada!");
 
-  resultado.textContent = mensagem;
+adicionarTexto("div", "info", "Referência: " + data.reference);
+adicionarTexto("div", "info", "Cliente: " + data.customer_name);
+adicionarTexto("div", "info", "Estado: " + data.status);
+adicionarTexto(
+  "div",
+  "info",
+  "Pagamento: " + (data.payment_status || "Pendente")
+);
+
+adicionarTexto("h4", "", "Produtos:");
+
+data.items.forEach(function(item) {
+  adicionarTexto(
+    "div",
+    "produto",
+    item.product_name + " — " +
+    item.quantity + " x " +
+    Number(item.unit_price).toLocaleString("pt-AO") + " Kz"
+  );
+});
+
+adicionarTexto(
+  "div",
+  "total",
+  "Total: " + Number(data.total).toLocaleString("pt-AO") + " Kz"
+);
+
+if (data.receipt_number) {
+  adicionarTexto(
+    "div",
+    "comprovativo",
+    "Comprovativo: " + data.receipt_number
+  );
+} else {
+  adicionarTexto(
+    "div",
+    "comprovativo",
+    "O comprovativo estará disponível após a confirmação do pagamento."
+  );
+}
+
+resultado.appendChild(card);
 });
                                                           
 renderProducts();
