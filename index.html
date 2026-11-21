@@ -146,6 +146,81 @@ footer {
   padding:25px 15px;
   font-size:13px;
 }
+  
+.consulta-section {
+  background: #f5f8fc;
+  padding: 45px 20px;
+}
+
+.consulta-container {
+  max-width: 500px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px 22px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 18px rgba(16, 43, 85, 0.08);
+}
+
+.consulta-icon {
+  font-size: 38px;
+  margin-bottom: 10px;
+}
+
+.consulta-container h2 {
+  color: var(--azul);
+  margin-bottom: 10px;
+}
+
+.consulta-container p {
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+#consulta-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+#consulta-form label {
+  color: var(--azul);
+  font-size: 13px;
+  font-weight: bold;
+}
+
+#consulta-form input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d9edff;
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+#consulta-form button {
+  width: 100%;
+  margin-top: 10px;
+  background: var(--azul);
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 9px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#consulta-form button:hover {
+  background: #244b7c;
+}
+
+#consulta-resultado {
+  margin-top: 20px;
+  text-align: left;
+}
+  
 </style>
 </head>
 <body>
@@ -204,9 +279,46 @@ footer {
   </form>
   <p class="empty">ASTH Home Store — Angola</p>
 </section>
+
 </main>
 
+<section id="consultar-encomenda" class="consulta-section">
+  <div class="consulta-container">
+    <div class="consulta-icon">📦</div>
+
+    <h2>Já fez uma encomenda?</h2>
+
+    <p>
+      Acompanhe a sua encomenda de forma simples e rápida.
+      Introduza a referência e o número de telefone utilizados na compra.
+    </p>
+
+    <form id="consulta-form">
+      <label for="consulta-referencia">Referência da encomenda</label>
+      <input
+        type="text"
+        id="consulta-referencia"
+        placeholder="Ex.: ASTH-A82F91C03B"
+        required
+      >
+
+      <label for="consulta-telefone">Número de telefone</label>
+      <input
+        type="tel"
+        id="consulta-telefone"
+        placeholder="Ex.: 923456789"
+        required
+      >
+
+      <button type="submit">Consultar encomenda</button>
+    </form>
+
+    <div id="consulta-resultado"></div>
+  </div>
+</section>
+
 <footer>
+  
   <strong>ASTH Home Store</strong>
   <p>SUA CASA, NOSSA PAIXÃO.</p>
 </footer>
@@ -379,6 +491,61 @@ async function sendOrder(event) {
 }
   
 
+document.getElementById("consulta-form").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const referencia = document.getElementById("consulta-referencia").value.trim();
+  const telefone = document.getElementById("consulta-telefone").value.trim();
+  const resultado = document.getElementById("consulta-resultado");
+
+  resultado.textContent = "A consultar a sua encomenda...";
+
+  const { data, error } = await supabaseClient.rpc(
+    "customer_order_lookup",
+    {
+      p_reference: referencia,
+      p_phone: telefone
+    }
+  );
+
+  if (error) {
+    resultado.textContent = "Não foi possível consultar a encomenda. Tente novamente.";
+    console.error(error);
+    return;
+  }
+
+  if (!data) {
+    resultado.textContent = "Não encontrámos uma encomenda com essa referência e telefone. Verifique os dados e tente novamente.";
+    return;
+  }
+
+  let mensagem =
+    "ENCOMENDA ENCONTRADA!\n\n" +
+    "Referência: " + data.reference + "\n" +
+    "Cliente: " + data.customer_name + "\n" +
+    "Estado: " + data.status + "\n" +
+    "Pagamento: " + (data.payment_status || "Pendente") + "\n" +
+    "Total: " + Number(data.total).toLocaleString("pt-AO") + " Kz\n\n" +
+    "PRODUTOS:\n";
+
+  data.items.forEach(function(item) {
+    mensagem +=
+      item.product_name + " — " +
+      item.quantity + " x " +
+      Number(item.unit_price).toLocaleString("pt-AO") + " Kz\n";
+  });
+
+  mensagem += "\n";
+
+  if (data.receipt_number) {
+    mensagem += "Comprovativo: " + data.receipt_number;
+  } else {
+    mensagem += "O comprovativo estará disponível após a confirmação do pagamento.";
+  }
+
+  resultado.textContent = mensagem;
+});
+                                                          
 renderProducts();
 renderCart();
 </script>
