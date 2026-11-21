@@ -340,10 +340,13 @@ async function addProduct() {
   await loadAdminData();
   }
   async function updateOrderStatus(id, newStatus) {
-  const { error } = await supabaseClient
-    .from("orders")
-    .update({ status: newStatus })
-    .eq("id", id);
+  const { error } = await supabaseClient.rpc(
+    "update_order_status_with_stock",
+    {
+      p_order_id: String(id),
+      p_new_status: newStatus
+    }
+  );
 
   if (error) {
     alert("Não foi possível atualizar a encomenda: " + error.message);
