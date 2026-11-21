@@ -234,7 +234,24 @@ categorySelect.innerHTML =
 </td>
 </tr>
 
-  document.getElementById("ordersTable").innerHTML =
+document.getElementById("productsTable").innerHTML =
+  products.data.map(p => `
+    <tr>
+      <td>${escapeHTML(p.name)}</td>
+      <td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
+      <td>${p.is_available ? "Sim" : "Não"}</td>
+      <td>${Number(p.stock || 0)} unidades</td>
+      <td>
+        <button onclick="editProduct('${p.id}')">Editar</button>
+        <button onclick="deleteProduct('${p.id}')">Eliminar</button>
+        <button onclick="updateProductStock('${p.id}', ${Number(p.stock || 0)})">
+          Actualizar stock
+        </button>
+      </td>
+    </tr>
+  `).join("");
+
+document.getElementById("ordersTable").innerHTML =
   orders.data.map(o => `
     <tr>
       <td>${escapeHTML(o.customer_name || "")}</td>
@@ -251,6 +268,7 @@ categorySelect.innerHTML =
       </td>
     </tr>
   `).join("");
+  
 }
 async function addProduct() {
   const name = document.getElementById("productName").value.trim();
