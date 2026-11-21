@@ -131,7 +131,15 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
   </button>
 </div>
         <table>
-          <thead><tr><th>Produto</th><th>Preço</th><th>Disponível</th></tr></thead>
+          <thead>
+  <tr>
+    <th>Produto</th>
+    <th>Preço</th>
+    <th>Disponível</th>
+    <th>Stock</th>
+    <th>Ações</th>
+  </tr>
+          </thead>
           <tbody id="productsTable"></tbody>
         </table>
       </div>
@@ -186,7 +194,7 @@ async function login() {
 
 async function loadAdminData() {
   const [products, orders, categories] = await Promise.all([
-    supabaseClient.from("products").select("id,name,price,is_available"),
+    supabaseClient.from("products").select("id,name,price,is_available,stock"),
     supabaseClient.from("orders").select("id,customer_name,total,status"),
     supabaseClient.from("categories").select("id,name")
   ]);
@@ -210,14 +218,14 @@ categorySelect.innerHTML =
   products.data.map(p => `
     <tr>
       <td>${escapeHTML(p.name)}</td>
-      <td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
-      <td>${p.is_available ? "Sim" : "Não"}</td>
-      <td>
-        <button onclick="editProduct('${p.id}')">Editar</button>
-<button onclick="deleteProduct('${p.id}')">Eliminar</button>
-      </td>
-    </tr>
-  `).join("");
+<td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
+<td>${p.is_available ? "Sim" : "Não"}</td>
+<td>${Number(p.stock || 0)} unidades</td>
+<td>
+  <button onclick="editProduct('${p.id}')">Editar</button>
+  <button onclick="deleteProduct('${p.id}')">Eliminar</button>
+</td>
+</tr>
 
   document.getElementById("ordersTable").innerHTML =
   orders.data.map(o => `
