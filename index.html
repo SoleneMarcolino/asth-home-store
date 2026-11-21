@@ -215,6 +215,7 @@ footer {
 let products = [];
 
 async function loadProducts() {
+  alert("A função loadProducts iniciou!");
   const { data, error } = await supabaseClient
     .from('products')
     .select('id, name, description, price, image_url, is_promotion, is_available')
