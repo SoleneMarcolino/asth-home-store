@@ -320,6 +320,7 @@ function checkout() {
   document.getElementById("contactos").scrollIntoView({behavior:"smooth"});
 }
 
+
 async function sendOrder(event) {
   event.preventDefault();
 
@@ -341,7 +342,7 @@ async function sendOrder(event) {
     await supabaseClient
       .from("orders")
       .insert([order])
-      .select("id")
+      .select("id, customer_reference")
       .single();
 
   if (orderError) {
@@ -366,12 +367,17 @@ async function sendOrder(event) {
     return;
   }
 
-  alert("Encomenda registada com sucesso na ASTH!");
+  alert(
+    "Encomenda enviada com sucesso na ASTH!\n\n" +
+    "A sua referência é: " + savedOrder.customer_reference +
+    "\n\nGuarde esta referência para consultar a sua encomenda."
+  );
 
   document.getElementById("order-form").reset();
   cart = [];
   renderCart();
-  }
+}
+  
 
 renderProducts();
 renderCart();
