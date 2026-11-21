@@ -522,12 +522,13 @@ function removeItem(id) {
   renderCart();
 }
 
+
 function changeQuantity(id, variation) {
-  const product = cart.find(p => p.id === id);
+  const product = cart.find(p => String(p.id) === String(id));
 
   if (!product) return;
 
-  product.quantity += variation;
+  product.quantity = Number(product.quantity) + variation;
 
   if (product.quantity <= 0) {
     removeItem(id);
@@ -535,7 +536,8 @@ function changeQuantity(id, variation) {
   }
 
   renderCart();
-    }
+}
+  
   
 function checkout() {
   if (!cart.length) {
