@@ -485,10 +485,11 @@ function addToCart(id) {
 }
   
 
+
 function renderCart() {
   const area = document.getElementById("cart-items");
-  const count = cart.reduce((sum,p) => sum + p.quantity, 0);
-  const total = cart.reduce((sum,p) => sum + p.price*p.quantity, 0);
+  const count = cart.reduce((sum, p) => sum + p.quantity, 0);
+  const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
 
   document.getElementById("cart-count").textContent = count;
   document.getElementById("total").textContent = formatPrice(total);
@@ -500,20 +501,42 @@ function renderCart() {
   }
 
   area.className = "";
+
   area.innerHTML = cart.map(p => `
     <div class="cart-item">
-      <span>${p.name} × ${p.quantity}</span>
-      <strong>${formatPrice(p.price*p.quantity)} Kz</strong>
-      <button class="secondary" onclick="removeItem('${p.id}')">×</button>
+      <span>${p.name}</span>
+      <div class="cart-controls">
+        <button class="secondary" onclick="changeQuantity('${p.id}', -1)">−</button>
+        <strong>${p.quantity}</strong>
+        <button class="secondary" onclick="changeQuantity('${p.id}', 1)">+</button>
+        <button class="secondary" onclick="removeItem('${p.id}')">Remover</button>
+      </div>
+      <strong>${formatPrice(p.price * p.quantity)} Kz</strong>
     </div>
   `).join("");
 }
+  
 
 function removeItem(id) {
   cart = cart.filter(p => p.id !== id);
   renderCart();
 }
 
+function changeQuantity(id, variation) {
+  const product = cart.find(p => p.id === id);
+
+  if (!product) return;
+
+  product.quantity += variation;
+
+  if (product.quantity <= 0) {
+    removeItem(id);
+    return;
+  }
+
+  renderCart();
+    }
+  
 function checkout() {
   if (!cart.length) {
     alert("Adicione produtos ao carrinho primeiro.");
