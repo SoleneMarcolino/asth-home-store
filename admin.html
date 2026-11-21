@@ -161,6 +161,7 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
 const SUPABASE_URL = "https://yipivcjqphceqtsfxpsl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_uztaOk3Mq4h6p46O_grDUg_ymdVKu30";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  console.log("ASTH: JavaScript carregado");
 
 async function login() {
   alert("A função login está a funcionar!");
@@ -191,7 +192,7 @@ async function login() {
   document.getElementById("login").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
   await loadAdminData();
-}
+} 
 
 async function loadAdminData() {
   const [products, orders, categories] = await Promise.all([
