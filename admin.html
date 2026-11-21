@@ -214,6 +214,7 @@ categorySelect.innerHTML =
       <td>${p.is_available ? "Sim" : "Não"}</td>
       <td>
         <button onclick="editProduct('${p.id}')">Editar</button>
+<button onclick="deleteProduct('${p.id}')">Eliminar</button>
       </td>
     </tr>
   `).join("");
@@ -306,6 +307,27 @@ async function addProduct() {
   }
 
   alert("Produto atualizado com sucesso!");
+  await loadAdminData();
+  }
+  async function deleteProduct(id) {
+  const confirmDelete = confirm(
+    "Tens a certeza de que pretendes eliminar este produto?"
+  );
+
+  if (!confirmDelete) return;
+
+  const { error } = await supabaseClient
+    .from("products")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Não foi possível eliminar o produto: " + error.message);
+    return;
+  }
+
+  alert("Produto eliminado com sucesso!");
+
   await loadAdminData();
   }
 function escapeHTML(value) {
