@@ -35,12 +35,22 @@ main { max-width:950px; margin:25px auto; padding:15px; }
   margin-bottom:18px;
   box-shadow:0 2px 10px #0000000d;
 }
-input,button {
+input,button,textarea,select {
   width:100%;
   padding:13px;
   margin:7px 0;
   border-radius:7px;
   font-size:16px;
+}
+
+input,textarea,select {
+  border:1px solid #ccd6e0;
+  background:white;
+}
+
+input[type="checkbox"] {
+  width:auto;
+  margin-right:8px;
 }
 input { border:1px solid #ccd6e0; }
 button {
