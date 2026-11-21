@@ -317,24 +317,58 @@ function checkout() {
   document.getElementById("contactos").scrollIntoView({behavior:"smooth"});
 }
 
-function sendOrder(event) {
+async function sendOrder(event) {
   event.preventDefault();
+
   if (!cart.length) {
     alert("O carrinho está vazio.");
     return;
   }
 
   const order = {
-    customer: document.getElementById("customer").value,
-    phone: document.getElementById("phone").value,
-    address: document.getElementById("address").value,
-    delivery: document.getElementById("delivery").value,
-    items: cart,
-    total: cart.reduce((sum,p) => sum + p.price*p.quantity, 0)
+    customer_name: document.getElementById("customer").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    address: document.getElementById("address").value.trim(),
+    delivery_date: document.getElementById("delivery").value,
+    total: cart.reduce((sum, p) => sum + p.price * p.quantity, 0),
+    status: "Pendente"
   };
 
-  alert("Os dados foram preenchidos. Na próxima etapa vamos ligar as encomendas ao WhatsApp e à área de gestão da ASTH.");
-  console.log("Encomenda preparada:", order);
+  const { data: savedOrder, error: orderError } =
+    await supabaseClient
+      .from("orders")
+      .insert([order])
+      .select("id")
+      .single();
+
+  if (orderError) {
+    alert("Erro ao registar encomenda: " + orderError.message);
+    return;
+  }
+
+  const orderItems = cart.map(p => ({
+    order_id: savedOrder.id,
+    product_id: p.id,
+    product_name: p.name,
+    quantity: p.quantity,
+    unit_price: p.price
+  }));
+
+  const { error: itemsError } = await supabaseClient
+    .from("order_items")
+    .insert(orderItems);
+
+  if (itemsError) {
+    alert("A encomenda foi registada, mas houve um erro nos produtos: " + itemsError.message);
+    return;
+  }
+
+  alert("Encomenda registada com sucesso na ASTH!");
+
+  document.getElementById("order-form").reset();
+  cart = [];
+  renderCart();
+  }
 }
 
 renderProducts();
