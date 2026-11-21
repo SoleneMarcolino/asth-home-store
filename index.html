@@ -268,7 +268,17 @@ footer {
 .consulta-result-card .status-cancelada {
   background: #ffe0e0;
   color: #a32222;
+  
+.consulta-result-card .pagamento-pendente {
+  background: #fff0cc;
+  color: #8a5a00;
 }
+
+.consulta-result-card .pagamento-pago {
+  background: #d9f5e5;
+  color: #176b3a;
+}
+  
 
 .consulta-result-card .total {
   margin-top: 15px;
@@ -639,11 +649,27 @@ linhaEstado.textContent = "Estado: ";
 linhaEstado.appendChild(etiquetaEstado);
 card.appendChild(linhaEstado);
   
-adicionarTexto(
-  "div",
-  "info",
-  "Pagamento: " + (data.payment_status || "Pendente")
-);
+
+const pagamento = (data.payment_status || "Pendente")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "");
+
+const classePagamento = pagamento === "pago"
+  ? "pagamento-pago"
+  : "pagamento-pendente";
+
+const linhaPagamento = document.createElement("div");
+linhaPagamento.className = "info";
+
+const etiquetaPagamento = document.createElement("span");
+etiquetaPagamento.className = "status " + classePagamento;
+etiquetaPagamento.textContent = data.payment_status || "Pendente";
+
+linhaPagamento.textContent = "Pagamento: ";
+linhaPagamento.appendChild(etiquetaPagamento);
+card.appendChild(linhaPagamento);
+  
 
 adicionarTexto("h4", "", "Produtos:");
 
