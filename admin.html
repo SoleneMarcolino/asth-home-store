@@ -101,6 +101,35 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
       <h2>Produtos</h2>
       <button onclick="loadAdminData()">Actualizar dados</button>
       <div class="table-wrap">
+        <h2>Adicionar novo produto</h2>
+
+<div class="product-form">
+  <input type="text" id="productName" placeholder="Nome do produto">
+
+  <textarea id="productDescription" placeholder="Descrição do produto"></textarea>
+
+  <input type="number" id="productPrice" placeholder="Preço em Kz">
+
+  <input type="url" id="productImage" placeholder="URL da fotografia">
+
+  <select id="productCategory">
+    <option value="">Selecionar categoria</option>
+  </select>
+
+  <label>
+    <input type="checkbox" id="productPromotion">
+    Produto em promoção
+  </label>
+
+  <label>
+    <input type="checkbox" id="productAvailable" checked>
+    Produto disponível
+  </label>
+
+  <button type="button" onclick="addProduct()">
+    Guardar produto
+  </button>
+</div>
         <table>
           <thead><tr><th>Produto</th><th>Preço</th><th>Disponível</th></tr></thead>
           <tbody id="productsTable"></tbody>
@@ -159,14 +188,20 @@ async function loadAdminData() {
   const [products, orders, categories] = await Promise.all([
     supabaseClient.from("products").select("id,name,price,is_available"),
     supabaseClient.from("orders").select("id,customer_name,total,status"),
-    supabaseClient.from("categories").select("id")
+    supabaseClient.from("categories").select("id,name")
   ]);
 
   if (products.error || orders.error || categories.error) {
     alert("Não foi possível carregar todos os dados. Verifica a ligação.");
     return;
   }
+const categorySelect = document.getElementById("productCategory");
 
+categorySelect.innerHTML =
+  '<option value="">Selecionar categoria</option>' +
+  categories.data.map(c =>
+    `<option value="${c.id}">${escapeHTML(c.name)}</option>`
+  ).join("");
   document.getElementById("productCount").textContent = products.data.length;
   document.getElementById("orderCount").textContent = orders.data.length;
   document.getElementById("categoryCount").textContent = categories.data.length;
@@ -189,7 +224,49 @@ async function loadAdminData() {
       </tr>
     `).join("");
 }
+async function addProduct() {
+  const name = document.getElementById("productName").value.trim();
+  const description = document.getElementById("productDescription").value.trim();
+  const price = Number(document.getElementById("productPrice").value);
+  const image_url = document.getElementById("productImage").value.trim();
+  const category_id = document.getElementById("productCategory").value;
+  const is_promotion = document.getElementById("productPromotion").checked;
+  const is_available = document.getElementById("productAvailable").checked;
 
+  if (!name || !price || price <= 0 || !category_id) {
+    alert("Preenche o nome, o preço e a categoria do produto.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("products")
+    .insert([{
+      name,
+      description,
+      price,
+      image_url: image_url || null,
+      category_id,
+      is_promotion,
+      is_available
+    }]);
+
+  if (error) {
+    alert("Erro ao guardar produto: " + error.message);
+    return;
+  }
+
+  alert("Produto guardado com sucesso!");
+
+  document.getElementById("productName").value = "";
+  document.getElementById("productDescription").value = "";
+  document.getElementById("productPrice").value = "";
+  document.getElementById("productImage").value = "";
+  document.getElementById("productCategory").value = "";
+  document.getElementById("productPromotion").checked = false;
+  document.getElementById("productAvailable").checked = true;
+
+  await loadAdminData();
+    }
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, c => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
