@@ -220,13 +220,22 @@ categorySelect.innerHTML =
   `).join("");
 
   document.getElementById("ordersTable").innerHTML =
-    orders.data.map(o => `
-      <tr>
-        <td>${escapeHTML(o.customer_name || "")}</td>
-        <td>${Number(o.total || 0).toLocaleString("pt-PT")} Kz</td>
-        <td>${escapeHTML(o.status || "")}</td>
-      </tr>
-    `).join("");
+  orders.data.map(o => `
+    <tr>
+      <td>${escapeHTML(o.customer_name || "")}</td>
+      <td>${Number(o.total || 0).toLocaleString("pt-PT")} Kz</td>
+      <td>${escapeHTML(o.status || "")}</td>
+      <td>
+        <select onchange="updateOrderStatus('${o.id}', this.value)">
+          <option value="Pendente" ${o.status === "Pendente" ? "selected" : ""}>Pendente</option>
+          <option value="Confirmada" ${o.status === "Confirmada" ? "selected" : ""}>Confirmada</option>
+          <option value="Em preparação" ${o.status === "Em preparação" ? "selected" : ""}>Em preparação</option>
+          <option value="Enviada" ${o.status === "Enviada" ? "selected" : ""}>Enviada</option>
+          <option value="Entregue" ${o.status === "Entregue" ? "selected" : ""}>Entregue</option>
+        </select>
+      </td>
+    </tr>
+  `).join("");
 }
 async function addProduct() {
   const name = document.getElementById("productName").value.trim();
@@ -328,6 +337,21 @@ async function addProduct() {
 
   alert("Produto eliminado com sucesso!");
 
+  await loadAdminData();
+  }
+  async function updateOrderStatus(id, newStatus) {
+  const { error } = await supabaseClient
+    .from("orders")
+    .update({ status: newStatus })
+    .eq("id", id);
+
+  if (error) {
+    alert("Não foi possível atualizar a encomenda: " + error.message);
+    await loadAdminData();
+    return;
+  }
+
+  alert("Estado da encomenda atualizado com sucesso!");
   await loadAdminData();
   }
 function escapeHTML(value) {
