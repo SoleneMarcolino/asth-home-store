@@ -243,13 +243,35 @@ footer {
 
 .consulta-result-card .status {
   display: inline-block;
-  background: #fff0cc;
-  color: #8a5a00;
-  padding: 5px 12px;
+ 
+.consulta-result-card .status {
+  display: inline-block;
+  padding: 6px 13px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: bold;
 }
+
+.consulta-result-card .status-pendente {
+  background: #fff0cc;
+  color: #8a5a00;
+}
+
+.consulta-result-card .status-confirmada {
+  background: #d9edff;
+  color: #174a7e;
+}
+
+.consulta-result-card .status-concluida {
+  background: #d9f5e5;
+  color: #176b3a;
+}
+
+.consulta-result-card .status-cancelada {
+  background: #ffe0e0;
+  color: #a32222;
+}
+  
 
 .consulta-result-card .total {
   margin-top: 15px;
@@ -592,7 +614,33 @@ adicionarTexto("h3", "", "📦 Encomenda encontrada!");
 
 adicionarTexto("div", "info", "Referência: " + data.reference);
 adicionarTexto("div", "info", "Cliente: " + data.customer_name);
-adicionarTexto("div", "info", "Estado: " + data.status);
+
+const estado = (data.status || "Pendente")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "");
+
+let classeEstado = "status-pendente";
+
+if (estado === "confirmada") {
+  classeEstado = "status-confirmada";
+} else if (estado === "concluida" || estado === "concluída") {
+  classeEstado = "status-concluida";
+} else if (estado === "cancelada") {
+  classeEstado = "status-cancelada";
+}
+
+const linhaEstado = document.createElement("div");
+linhaEstado.className = "info";
+
+const etiquetaEstado = document.createElement("span");
+etiquetaEstado.className = "status " + classeEstado;
+etiquetaEstado.textContent = data.status || "Pendente";
+
+linhaEstado.textContent = "Estado: ";
+linhaEstado.appendChild(etiquetaEstado);
+card.appendChild(linhaEstado);
+  
 adicionarTexto(
   "div",
   "info",
