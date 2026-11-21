@@ -217,22 +217,7 @@ categorySelect.innerHTML =
   document.getElementById("categoryCount").textContent = categories.data.length;
 
   document.getElementById("productsTable").innerHTML =
-  products.data.map(p => `
-    <tr>
-      <td>${escapeHTML(p.name)}</td>
-<td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
-<td>${p.is_available ? "Sim" : "Não"}</td>
-<td>${Number(p.stock || 0)} unidades</td>
-<td>
-<button onclick="editProduct('${p.id}')">Editar</button>
-
-<button onclick="deleteProduct('${p.id}')">Eliminar</button>
-
-<button onclick="updateProductStock('${p.id}', ${Number(p.stock || 0)})">
-  Actualizar stock
-</button>
-</td>
-</tr>
+  
 
 document.getElementById("productsTable").innerHTML =
   products.data.map(p => `
