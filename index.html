@@ -221,8 +221,9 @@ async function loadProducts() {
     .eq('is_available', true);
 
   if (error) {
-    console.error('Erro ao carregar produtos:', error);
-    return;
+  console.error('Erro ao carregar produtos:', error);
+  alert('Erro ao carregar produtos: ' + error.message);
+  return;
   }
 
   products = data;
