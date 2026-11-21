@@ -109,6 +109,7 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
   <textarea id="productDescription" placeholder="Descrição do produto"></textarea>
 
   <input type="number" id="productPrice" placeholder="Preço em Kz">
+  <input type="number" id="productStock" placeholder="Quantidade em stock" min="0" value="0">
 
   <input type="url" id="productImage" placeholder="URL da fotografia">
 
@@ -256,6 +257,7 @@ async function addProduct() {
   const name = document.getElementById("productName").value.trim();
   const description = document.getElementById("productDescription").value.trim();
   const price = Number(document.getElementById("productPrice").value);
+  const stock = Number(document.getElementById("productStock").value);
   const image_url = document.getElementById("productImage").value.trim();
   const category_id = document.getElementById("productCategory").value;
   const is_promotion = document.getElementById("productPromotion").checked;
@@ -272,6 +274,7 @@ async function addProduct() {
       name,
       description,
       price,
+      stock,
       image_url: image_url || null,
       category_id,
       is_promotion,
@@ -288,6 +291,7 @@ async function addProduct() {
   document.getElementById("productName").value = "";
   document.getElementById("productDescription").value = "";
   document.getElementById("productPrice").value = "";
+  document.getElementById("productStock").value = "0";
   document.getElementById("productImage").value = "";
   document.getElementById("productCategory").value = "";
   document.getElementById("productPromotion").checked = false;
