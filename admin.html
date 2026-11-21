@@ -300,8 +300,8 @@ document.getElementById("ordersTable").innerHTML =
         </td>
 
         <td>${Number(o.total || 0).toLocaleString("pt-PT")} Kz</td>
-        <td>
-  <td>
+        
+<td>
   <strong>Forma de pagamento:</strong>
 
   <select onchange="updateOrderPayment('${o.id}', 'payment_method', this.value)">
@@ -323,6 +323,7 @@ document.getElementById("ordersTable").innerHTML =
     ? new Date(o.payment_date).toLocaleDateString("pt-PT")
     : "Ainda não pago"}
 </td>
+
 
         <td>${escapeHTML(o.delivery_date || "Não indicada")}</td>
 
