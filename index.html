@@ -365,6 +365,15 @@ footer {
     <textarea id="address" placeholder="Morada de entrega" required></textarea>
     <label>Data preferida de entrega:</label>
     <input id="delivery" type="date" required>
+    
+<label for="payment-method">Forma de pagamento:</label>
+<select id="payment-method" required>
+  <option value="">Escolha como pretende pagar</option>
+  <option value="Transferência bancária (BFA)">Transferência bancária (BFA)</option>
+  <option value="Express">Express</option>
+  <option value="PayPay">PayPay</option>
+</select>
+    
     <button type="submit">Preparar encomenda</button>
   </form>
   <p class="empty">ASTH Home Store — Angola</p>
@@ -562,9 +571,11 @@ async function sendOrder(event) {
     customer_name: document.getElementById("customer").value.trim(),
     phone: document.getElementById("phone").value.trim(),
     address: document.getElementById("address").value.trim(),
-    delivery_date: document.getElementById("delivery").value,
-    total: cart.reduce((sum, p) => sum + p.price * p.quantity, 0),
-    status: "Pendente"
+    
+delivery_date: document.getElementById("delivery").value,
+payment_method: document.getElementById("payment-method").value,
+total: cart.reduce((sum, p) => sum + p.price * p.quantity, 0),
+status: "Pendente"
   };
 
   const { data: savedOrder, error: orderError } =
