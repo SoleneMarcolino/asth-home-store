@@ -207,13 +207,16 @@ categorySelect.innerHTML =
   document.getElementById("categoryCount").textContent = categories.data.length;
 
   document.getElementById("productsTable").innerHTML =
-    products.data.map(p => `
-      <tr>
-        <td>${escapeHTML(p.name)}</td>
-        <td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
-        <td>${p.is_available ? "Sim" : "Não"}</td>
-      </tr>
-    `).join("");
+  products.data.map(p => `
+    <tr>
+      <td>${escapeHTML(p.name)}</td>
+      <td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
+      <td>${p.is_available ? "Sim" : "Não"}</td>
+      <td>
+        <button onclick="editProduct('${p.id}')">Editar</button>
+      </td>
+    </tr>
+  `).join("");
 
   document.getElementById("ordersTable").innerHTML =
     orders.data.map(o => `
@@ -267,6 +270,44 @@ async function addProduct() {
 
   await loadAdminData();
     }
+  async function editProduct(id) {
+  const { data: product, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !product) {
+    alert("Não foi possível encontrar o produto.");
+    return;
+  }
+
+  const name = prompt("Nome do produto:", product.name);
+  if (name === null) return;
+
+  const price = prompt("Preço do produto:", product.price);
+  if (price === null) return;
+
+  const description = prompt("Descrição:", product.description || "");
+  if (description === null) return;
+
+  const { error: updateError } = await supabaseClient
+    .from("products")
+    .update({
+      name: name.trim(),
+      price: Number(price),
+      description: description.trim()
+    })
+    .eq("id", id);
+
+  if (updateError) {
+    alert("Erro ao atualizar: " + updateError.message);
+    return;
+  }
+
+  alert("Produto atualizado com sucesso!");
+  await loadAdminData();
+  }
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, c => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
