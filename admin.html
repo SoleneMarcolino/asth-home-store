@@ -171,6 +171,7 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
     <th>Data de entrega</th>
     <th>Estado</th>
     <th>Actualizar estado</th>
+    <th>Comprovativo</th>
   </tr>
           </thead>
           <tbody id="ordersTable"></tbody>
@@ -335,6 +336,13 @@ document.getElementById("ordersTable").innerHTML =
             <option value="Enviada" ${o.status === "Enviada" ? "selected" : ""}>Enviada</option>
             <option value="Entregue" ${o.status === "Entregue" ? "selected" : ""}>Entregue</option>
           </select>
+        </td>
+                <td>
+          ${o.payment_status === "Pago" && o.receipt_number
+            ? `<button type="button" onclick="generateCompanyReceipt('${o.id}')">
+                Gerar comprovativo
+              </button>`
+            : "Disponível após confirmação do pagamento"}
         </td>
       </tr>
     `;
@@ -520,6 +528,180 @@ async function addProduct() {
 
   alert("Pagamento atualizado com sucesso!");
   await loadAdminData();
+  }
+  async function generateCompanyReceipt(orderId) {
+  const printWindow = window.open("", "_blank");
+
+  if (!printWindow) {
+    alert("Permite a abertura de janelas para gerar o comprovativo.");
+    return;
+  }
+
+  printWindow.document.write("<p>A preparar o comprovativo...</p>");
+
+  const { data: order, error: orderError } = await supabaseClient
+    .from("orders")
+    .select("*")
+    .eq("id", orderId)
+    .single();
+
+  if (orderError || !order) {
+    printWindow.close();
+    alert("Não foi possível carregar a encomenda.");
+    return;
+  }
+
+  if (order.payment_status !== "Pago" || !order.receipt_number) {
+    printWindow.close();
+    alert("O comprovativo só está disponível após confirmação do pagamento.");
+    return;
+  }
+
+  const { data: items, error: itemsError } = await supabaseClient
+    .from("order_items")
+    .select("product_name,quantity,unit_price")
+    .eq("order_id", orderId);
+
+  if (itemsError) {
+    printWindow.close();
+    alert("Não foi possível carregar os produtos da encomenda.");
+    return;
+  }
+
+  const rows = (items || []).map(item => `
+    <tr>
+      <td>${escapeHTML(item.product_name)}</td>
+      <td>${Number(item.quantity)}</td>
+      <td>${Number(item.unit_price).toLocaleString("pt-PT")} Kz</td>
+      <td>${(Number(item.quantity) * Number(item.unit_price)).toLocaleString("pt-PT")} Kz</td>
+    </tr>
+  `).join("");
+
+  printWindow.document.open();
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="pt">
+    <head>
+      <meta charset="UTF-8">
+      <title>Comprovativo ${escapeHTML(order.receipt_number)}</title>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          color: #17365d;
+          padding: 30px;
+        }
+
+        h1, h2 {
+          text-align: center;
+        }
+
+        .slogan {
+          text-align: center;
+          color: #6c9bc5;
+        }
+
+        .info {
+          margin: 25px 0;
+          line-height: 1.8;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+
+        th, td {
+          border: 1px solid #ccd6e0;
+          padding: 10px;
+          text-align: left;
+        }
+
+        th {
+          background: #d9edff;
+        }
+
+        .total {
+          text-align: right;
+          font-size: 20px;
+          font-weight: bold;
+          margin-top: 25px;
+        }
+
+        .footer {
+          text-align: center;
+          margin-top: 40px;
+        }
+
+        .print-button {
+          display: block;
+          margin: 25px auto;
+          padding: 12px 25px;
+          background: #17365d;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 16px;
+        }
+
+        @media print {
+          .print-button {
+            display: none;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+      <h1>ASTH Home Store</h1>
+      <p class="slogan">SUA CASA, NOSSA PAIXÃO.</p>
+
+      <h2>COMPROVATIVO DE COMPRA</h2>
+
+      <div class="info">
+        <strong>Número:</strong> ${escapeHTML(order.receipt_number)}<br>
+        <strong>Cliente:</strong> ${escapeHTML(order.customer_name || "")}<br>
+        <strong>Telefone:</strong> ${escapeHTML(order.phone || "Não indicado")}<br>
+        <strong>Morada:</strong> ${escapeHTML(order.address || "Não indicada")}<br>
+        <strong>Data do pagamento:</strong>
+        ${order.payment_date ? new Date(order.payment_date).toLocaleDateString("pt-PT") : "Não indicada"}<br>
+        <strong>Forma de pagamento:</strong> ${escapeHTML(order.payment_method || "")}<br>
+        <strong>Estado:</strong> ${escapeHTML(order.payment_status)}
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Preço unitário</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+
+      <p class="total">
+        TOTAL PAGO: ${Number(order.total || 0).toLocaleString("pt-PT")} Kz
+      </p>
+
+      <div class="footer">
+        Obrigado por comprar na ASTH Home Store!
+      </div>
+
+      <button class="print-button" onclick="window.print()">
+        Imprimir / Guardar em PDF
+      </button>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
   }
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, c => ({
