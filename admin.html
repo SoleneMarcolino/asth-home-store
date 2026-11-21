@@ -161,7 +161,17 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
       <h2>Encomendas</h2>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <thead>
+  <tr>
+    <th>Cliente</th>
+    <th>Contacto e morada</th>
+    <th>Produtos e quantidades</th>
+    <th>Total</th>
+    <th>Data de entrega</th>
+    <th>Estado</th>
+    <th>Actualizar estado</th>
+  </tr>
+          </thead>
           <tbody id="ordersTable"></tbody>
         </table>
       </div>
@@ -208,7 +218,7 @@ async function login() {
 async function loadAdminData() {
   const [products, orders, categories] = await Promise.all([
     supabaseClient.from("products").select("id,name,price,is_available,stock"),
-    supabaseClient.from("orders").select("id,customer_name,total,status"),
+    supabaseClient.from("orders").select("id,customer_name,total,status,phone,address,delivery_date"),
     supabaseClient.from("categories").select("id,name")
   ]);
 
@@ -216,6 +226,23 @@ async function loadAdminData() {
     alert("Não foi possível carregar todos os dados. Verifica a ligação.");
     return;
   }
+  const orderIds = orders.data.map(o => o.id);
+
+let orderItems = [];
+
+if (orderIds.length > 0) {
+  const { data, error } = await supabaseClient
+    .from("order_items")
+    .select("order_id,product_name,quantity,unit_price")
+    .in("order_id", orderIds);
+
+  if (error) {
+    alert("Erro ao carregar os artigos das encomendas: " + error.message);
+    return;
+  }
+
+  orderItems = data || [];
+}
 const categorySelect = document.getElementById("productCategory");
 
 categorySelect.innerHTML =
@@ -246,23 +273,48 @@ document.getElementById("productsTable").innerHTML =
   `).join("");
 
 document.getElementById("ordersTable").innerHTML =
-  orders.data.map(o => `
-    <tr>
-      <td>${escapeHTML(o.customer_name || "")}</td>
-      <td>${Number(o.total || 0).toLocaleString("pt-PT")} Kz</td>
-      <td>${escapeHTML(o.status || "")}</td>
-      <td>
-        <select onchange="updateOrderStatus('${o.id}', this.value)">
-          <option value="Pendente" ${o.status === "Pendente" ? "selected" : ""}>Pendente</option>
-          <option value="Confirmada" ${o.status === "Confirmada" ? "selected" : ""}>Confirmada</option>
-          <option value="Em preparação" ${o.status === "Em preparação" ? "selected" : ""}>Em preparação</option>
-          <option value="Enviada" ${o.status === "Enviada" ? "selected" : ""}>Enviada</option>
-          <option value="Entregue" ${o.status === "Entregue" ? "selected" : ""}>Entregue</option>
-        </select>
-      </td>
-    </tr>
-  `).join("");
-  
+  orders.data.map(o => {
+    const items = orderItems.filter(item =>
+      String(item.order_id) === String(o.id)
+    );
+
+    return `
+      <tr>
+        <td>${escapeHTML(o.customer_name || "")}</td>
+
+        <td>
+          ${escapeHTML(o.phone || "Não indicado")}<br>
+          ${escapeHTML(o.address || "Não indicada")}
+        </td>
+
+        <td>
+          ${items.map(item => `
+            <div>
+              ${escapeHTML(item.product_name)} —
+              ${Number(item.quantity)} unidade(s)
+              × ${Number(item.unit_price).toLocaleString("pt-PT")} Kz
+            </div>
+          `).join("") || "Sem artigos registados"}
+        </td>
+
+        <td>${Number(o.total || 0).toLocaleString("pt-PT")} Kz</td>
+
+        <td>${escapeHTML(o.delivery_date || "Não indicada")}</td>
+
+        <td>${escapeHTML(o.status || "")}</td>
+
+        <td>
+          <select onchange="updateOrderStatus('${o.id}', this.value)">
+            <option value="Pendente" ${o.status === "Pendente" ? "selected" : ""}>Pendente</option>
+            <option value="Confirmada" ${o.status === "Confirmada" ? "selected" : ""}>Confirmada</option>
+            <option value="Em preparação" ${o.status === "Em preparação" ? "selected" : ""}>Em preparação</option>
+            <option value="Enviada" ${o.status === "Enviada" ? "selected" : ""}>Enviada</option>
+            <option value="Entregue" ${o.status === "Entregue" ? "selected" : ""}>Entregue</option>
+          </select>
+        </td>
+      </tr>
+    `;
+  }).join("");
 }
 async function addProduct() {
   const name = document.getElementById("productName").value.trim();
