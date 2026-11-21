@@ -167,6 +167,7 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
     <th>Contacto e morada</th>
     <th>Produtos e quantidades</th>
     <th>Total</th>
+    <th>Pagamento</th>
     <th>Data de entrega</th>
     <th>Estado</th>
     <th>Actualizar estado</th>
@@ -218,7 +219,7 @@ async function login() {
 async function loadAdminData() {
   const [products, orders, categories] = await Promise.all([
     supabaseClient.from("products").select("id,name,price,is_available,stock"),
-    supabaseClient.from("orders").select("id,customer_name,total,status,phone,address,delivery_date"),
+    supabaseClient.from("orders").select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date"),
     supabaseClient.from("categories").select("id,name")
   ]);
 
@@ -298,6 +299,29 @@ document.getElementById("ordersTable").innerHTML =
         </td>
 
         <td>${Number(o.total || 0).toLocaleString("pt-PT")} Kz</td>
+        <td>
+  <td>
+  <strong>Forma de pagamento:</strong>
+
+  <select onchange="updateOrderPayment('${o.id}', 'payment_method', this.value)">
+    <option value="">Selecionar forma</option>
+    <option value="Transferência Bancária" ${o.payment_method === "Transferência Bancária" ? "selected" : ""}>Transferência Bancária</option>
+    <option value="Express" ${o.payment_method === "Express" ? "selected" : ""}>Express</option>
+    <option value="PayPay" ${o.payment_method === "PayPay" ? "selected" : ""}>PayPay</option>
+  </select>
+
+  <strong>Estado do pagamento:</strong>
+
+  <select onchange="updateOrderPayment('${o.id}', 'payment_status', this.value)">
+    <option value="Pendente" ${o.payment_status === "Pendente" ? "selected" : ""}>Pendente</option>
+    <option value="Pago" ${o.payment_status === "Pago" ? "selected" : ""}>Pago</option>
+  </select>
+
+  <strong>Data:</strong>
+  ${o.payment_date
+    ? new Date(o.payment_date).toLocaleDateString("pt-PT")
+    : "Ainda não pago"}
+</td>
 
         <td>${escapeHTML(o.delivery_date || "Não indicada")}</td>
 
@@ -465,6 +489,36 @@ async function addProduct() {
   }
 
   alert("Estado da encomenda atualizado com sucesso!");
+  await loadAdminData();
+  }
+  async function updateOrderPayment(id, field, value) {
+
+  if (!["payment_method", "payment_status"].includes(field)) {
+    return;
+  }
+
+  const updates = {
+    [field]: value
+  };
+
+  if (field === "payment_status") {
+    updates.payment_date = value === "Pago"
+      ? new Date().toISOString()
+      : null;
+  }
+
+  const { error } = await supabaseClient
+    .from("orders")
+    .update(updates)
+    .eq("id", id);
+
+  if (error) {
+    alert("Erro ao atualizar pagamento: " + error.message);
+    await loadAdminData();
+    return;
+  }
+
+  alert("Pagamento atualizado com sucesso!");
   await loadAdminData();
   }
 function escapeHTML(value) {
