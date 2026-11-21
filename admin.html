@@ -163,6 +163,7 @@ const SUPABASE_KEY = "sb_publishable_uztaOk3Mq4h6p46O_grDUg_ymdVKu30";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function login() {
+  alert("A função login está a funcionar!");
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   const message = document.getElementById("message");
