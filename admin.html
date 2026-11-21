@@ -222,8 +222,13 @@ categorySelect.innerHTML =
 <td>${p.is_available ? "Sim" : "Não"}</td>
 <td>${Number(p.stock || 0)} unidades</td>
 <td>
-  <button onclick="editProduct('${p.id}')">Editar</button>
-  <button onclick="deleteProduct('${p.id}')">Eliminar</button>
+<button onclick="editProduct('${p.id}')">Editar</button>
+
+<button onclick="deleteProduct('${p.id}')">Eliminar</button>
+
+<button onclick="updateProductStock('${p.id}', ${Number(p.stock || 0)})">
+  Actualizar stock
+</button>
 </td>
 </tr>
 
@@ -347,6 +352,34 @@ async function addProduct() {
 
   await loadAdminData();
   }
+  async function updateProductStock(id, currentStock) {
+  const answer = prompt(
+    "Introduz a nova quantidade em stock:",
+    currentStock
+  );
+
+  if (answer === null) return;
+
+  const quantity = Number(answer);
+
+  if (!Number.isInteger(quantity) || quantity < 0) {
+    alert("Introduz uma quantidade inteira igual ou superior a zero.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("products")
+    .update({ stock: quantity })
+    .eq("id", id);
+
+  if (error) {
+    alert("Erro ao atualizar stock: " + error.message);
+    return;
+  }
+
+  alert("Stock atualizado com sucesso!");
+  await loadAdminData();
+}
   async function updateOrderStatus(id, newStatus) {
   const { error } = await supabaseClient.rpc(
     "update_order_status_with_stock",
