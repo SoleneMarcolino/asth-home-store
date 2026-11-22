@@ -510,11 +510,18 @@ categories = categoriesData || [];
   }
 const { data: salesData, error: salesError } = await supabaseClient
   .from("order_items")
-  .select("product_id, quantity");
+  .select("product_id, quantity, orders!inner(payment_status)")
+  .eq("orders.payment_status", "Pago");
 
 if (salesError) {
   console.error("Erro ao carregar vendas:", salesError);
   }
+  const salesCount = {};
+
+(salesData || []).forEach(item => {
+  salesCount[item.product_id] =
+    (salesCount[item.product_id] || 0) + Number(item.quantity);
+});
   products = data;
   renderProducts();
 }
