@@ -447,7 +447,46 @@ footer {
   font-size: 13px;
 }
   
-  
+  .bottom-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  body {
+    padding-bottom: 85px;
+  }
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    border-top: 1px solid #e6edf5;
+    box-shadow: 0 -3px 12px rgba(16,43,85,0.10);
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 3px;
+    z-index: 999;
+  }
+
+  .bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #102b55;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: bold;
+    flex: 1;
+  }
+
+  .bottom-nav span {
+    font-size: 21px;
+  }
+      }
   
 </style>
 </head>
@@ -468,7 +507,32 @@ footer {
   <a href="#carrinho">Carrinho (<span id="cart-count">0</span>)</a>
   <a href="#contactos">Contactos</a>
 </nav>
+<div class="bottom-nav">
+  <a href="#inicio">
+    <span>⌂</span>
+    Início
+  </a>
 
+  <a href="#category-list">
+    <span>▦</span>
+    Categorias
+  </a>
+
+  <a href="#promocoes">
+    <span>✧</span>
+    Ofertas
+  </a>
+
+  <a href="#carrinho">
+    <span>🛒</span>
+    Carrinho
+  </a>
+
+  <a href="#consulta-form">
+    <span>♙</span>
+    Conta
+  </a>
+</div>
 <main>
 <section class="hero" id="inicio">
   <h1>A sua casa merece ser especial!</h1>
