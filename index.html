@@ -72,6 +72,33 @@ nav a {
 .hero p { line-height:1.6; }
 section { padding:25px 16px; }
 h2 { color:var(--azul); text-align:center; }
+  .category-list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 12px 5%;
+  scrollbar-width: none;
+}
+
+.category-list::-webkit-scrollbar {
+  display: none;
+}
+
+.category-list button {
+  flex-shrink: 0;
+  padding: 11px 18px;
+  border: 1px solid #dce6f0;
+  border-radius: 25px;
+  background: #ffffff;
+  color: var(--azul);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.category-list button:hover {
+  background: var(--bebe);
+  border-color: var(--bebe);
+}
 .search {
   display:block;
   width:90%;
@@ -441,12 +468,24 @@ footer {
 
 <script>
 let products = [];
+  let categories = [];
+let selectedCategory = "";
 
 async function loadProducts() {
   const { data, error } = await supabaseClient
     .from('products')
     .select('id, name, description, price, image_url, is_promotion, is_available, category_id')
     .eq('is_available', true);
+  const { data: categoriesData, error: categoriesError } = await supabaseClient
+  .from('categories')
+  .select('id, name');
+
+if (categoriesError) {
+  console.error('Erro ao carregar categorias:', categoriesError);
+  return;
+}
+
+categories = categoriesData || [];
 
   if (error) {
   console.error('Erro ao carregar produtos:', error);
@@ -464,10 +503,23 @@ function formatPrice(value) {
   return value.toLocaleString("pt-PT");
 }
 
-
+function filterCategory(categoryId) {
+  selectedCategory = categoryId;
+  renderProducts();
+}
 function renderProducts() {
   const searchInput = document.getElementById("search");
   const list = document.getElementById("product-list");
+  const categoryList = document.getElementById("category-list");
+
+if (categoryList) {
+  categoryList.innerHTML = `
+    <button onclick="filterCategory('')">Todas</button>
+    ${categories.map(c => `
+      <button onclick="filterCategory('${c.id}')">${c.name}</button>
+    `).join("")}
+  `;
+}
 
   if (!list) return;
 
@@ -486,8 +538,9 @@ function renderProducts() {
   }
 
   const filtered = products.filter(p =>
-    normalizar(p.name).includes(search)
-  );
+  normalizar(p.name).includes(search) &&
+  (!selectedCategory || p.category_id === selectedCategory)
+);
 
   if (!filtered.length) {
     list.innerHTML = '<p class="empty">Não encontrámos produtos com esse nome. Experimente outra pesquisa.</p>';
