@@ -249,7 +249,6 @@ button {
   color: #102b55;
   transform: translateY(-2px);
   }
-button:hover { opacity:.9; }
 .secondary { background:#8bbfe5; color:#102b55; }
 .empty { text-align:center; padding:25px; color:#64748b; }
 .cart {
@@ -638,7 +637,7 @@ if (bestSellersList) {
     .slice(0, 3);
 
   bestSellersList.innerHTML = bestSellers.length
-    ? bestSellersList.innerHTML = bestSellers.map(item => `
+    ? bestSellers.map(item => `
         <article class="product">
           <img src="${item.product.image_url || ''}" alt="${item.product.name}">
           <h3>${item.product.name}</h3>
