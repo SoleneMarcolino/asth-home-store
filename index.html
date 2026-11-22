@@ -596,22 +596,53 @@ footer {
 <section id="contactos">
   <h2>Faça a sua encomenda</h2>
   <form id="order-form" onsubmit="sendOrder(event)">
-    <input id="customer" placeholder="Nome completo" required>
-    <input id="phone" type="tel" placeholder="Número de telefone" required>
-    <textarea id="address" placeholder="Morada de entrega" required></textarea>
-    <label>Data preferida de entrega:</label>
-    <input id="delivery" type="date" required>
-    
-<label for="payment-method">Forma de pagamento:</label>
-<select id="payment-method" required>
-  <option value="">Escolha como pretende pagar</option>
-  <option value="Transferência bancária (BFA)">Transferência bancária (BFA)</option>
-  <option value="Express">Express</option>
-  <option value="PayPay">PayPay</option>
+  
+<form id="order-form" onsubmit="sendOrder(event)">
+
+  <input id="customer" placeholder="Nome completo" required>
+
+  <input id="phone" type="tel" placeholder="Número de telefone" required>
+
+  <label for="delivery-type">Como pretende receber a encomenda?</label>
+  <select id="delivery-type" required>
+    <option value="">Escolha a modalidade de entrega</option>
+    <option value="Entrega ao domicílio">Entrega ao domicílio</option>
+    <option value="Levantamento em ponto combinado">Levantamento em ponto combinado</option>
+  </select>
+
+  <label for="address">Morada ou zona de referência:</label>
+<textarea id="address" placeholder="Indique a sua província, município, bairro e uma referência próxima da sua residência." required></textarea>
+  <label for="pickup-preference">Se preferir levantamento, onde gostaria de levantar a encomenda?</label>
+
+<select id="pickup-preference">
+  <option value="">Escolha uma preferência (opcional)</option>
+  <option value="Agência de entrega de encomendas">Agência de entrega de encomendas</option>
+  <option value="Ponto próximo da minha residência">Ponto próximo da minha residência</option>
 </select>
+  <button type="button" onclick="getCustomerLocation()">
+    📍 Partilhar a minha localização
+  </button>
+
+  <p id="location-status">Ainda não partilhou a sua localização.</p>
+
+  <input type="hidden" id="latitude">
+  <input type="hidden" id="longitude">
+
+  <label for="delivery">Data preferida para receber ou levantar a encomenda:</label>
+  <input id="delivery" type="date" required>
+
+  <label for="payment-method">Forma de pagamento:</label>
+  <select id="payment-method" required>
+    <option value="">Escolha como pretende pagar</option>
+    <option value="Transferência bancária (BFA)">Transferência bancária (BFA)</option>
+    <option value="Express">Express</option>
+    <option value="PayPay">PayPay</option>
+  </select>
+
+  <button type="submit">Preparar encomenda</button>
+
+</form>
     
-    <button type="submit">Preparar encomenda</button>
-  </form>
   <p class="empty">ASTH Home Store — Angola</p>
 </section>
 
@@ -919,7 +950,40 @@ function checkout() {
   }
   document.getElementById("contactos").scrollIntoView({behavior:"smooth"});
 }
+function getCustomerLocation() {
+  const status = document.getElementById("location-status");
 
+  if (!navigator.geolocation) {
+    status.textContent = "O seu dispositivo não suporta localização.";
+    return;
+  }
+
+  status.textContent = "A obter a sua localização...";
+
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      document.getElementById("latitude").value =
+        position.coords.latitude;
+
+      document.getElementById("longitude").value =
+        position.coords.longitude;
+
+      status.textContent = "Localização partilhada com sucesso!";
+    },
+    function(error) {
+      if (error.code === 1) {
+        status.textContent = "Permita o acesso à localização no telemóvel.";
+      } else {
+        status.textContent = "Não foi possível obter a localização. Tente novamente.";
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
+  }
 
 async function sendOrder(event) {
   event.preventDefault();
@@ -930,15 +994,22 @@ async function sendOrder(event) {
   }
 
   const order = {
-    customer_name: document.getElementById("customer").value.trim(),
-    phone: document.getElementById("phone").value.trim(),
-    address: document.getElementById("address").value.trim(),
-    
-delivery_date: document.getElementById("delivery").value,
-payment_method: document.getElementById("payment-method").value,
-total: cart.reduce((sum, p) => sum + p.price * p.quantity, 0),
-status: "Pendente"
-  };
+  customer_name: document.getElementById("customer").value.trim(),
+  phone: document.getElementById("phone").value.trim(),
+  address: document.getElementById("address").value.trim(),
+  delivery_type: document.getElementById("delivery-type").value,
+  pickup_preference: document.getElementById("pickup-preference").value,
+  latitude: document.getElementById("latitude").value
+    ? Number(document.getElementById("latitude").value)
+    : null,
+  longitude: document.getElementById("longitude").value
+    ? Number(document.getElementById("longitude").value)
+    : null,
+  delivery_date: document.getElementById("delivery").value,
+  payment_method: document.getElementById("payment-method").value,
+  total: cart.reduce((sum, p) => sum + p.price * p.quantity, 0),
+  status: "Pendente"
+};
 
   const { data: savedOrder, error: orderError } =
     await supabaseClient
