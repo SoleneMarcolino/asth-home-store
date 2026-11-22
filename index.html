@@ -281,7 +281,6 @@ footer {
   color: #176b3a;
 }
   
-}
   
 
 .consulta-result-card .total {
@@ -426,7 +425,6 @@ footer {
 let products = [];
 
 async function loadProducts() {
-  alert("A função loadProducts iniciou!");
   const { data, error } = await supabaseClient
     .from('products')
     .select('id, name, description, price, image_url, is_promotion, is_available')
@@ -439,7 +437,6 @@ async function loadProducts() {
   }
 
   products = data;
-  alert("Produtos encontrados: " + data.length);
   renderProducts();
 }
 
@@ -748,7 +745,6 @@ if (data.receipt_number) {
 resultado.appendChild(card);
 });
                                                           
-renderProducts();
 renderCart();
 </script>
   
