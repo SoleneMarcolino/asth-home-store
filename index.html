@@ -442,7 +442,7 @@ let products = [];
 async function loadProducts() {
   const { data, error } = await supabaseClient
     .from('products')
-    .select('id, name, description, price, image_url, is_promotion, is_available')
+    .select('id, name, description, price, image_url, is_promotion, is_available, category_id')
     .eq('is_available', true);
 
   if (error) {
