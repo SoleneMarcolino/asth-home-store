@@ -441,8 +441,9 @@ footer {
   </div>
 </section>
 <section id="promocoes">
-  <h2>Promoções especiais</h2>
-  <p class="empty">Em breve, novidades e preços especiais para si!</p>
+  <h2>✨ Ofertas Especiais</h2>
+  <p class="empty">Descubra os nossos produtos com preços especiais!</p>
+  <div class="products" id="promotion-list"></div>
 </section>
 
 <section id="carrinho">
@@ -602,6 +603,7 @@ function renderProducts() {
   const searchInput = document.getElementById("search");
   const list = document.getElementById("product-list");
   const categoryList = document.getElementById("category-list");
+  const promotionList = document.getElementById("promotion-list");
   const newProductsList = document.getElementById("new-products");
 
 if (categoryList) {
@@ -658,6 +660,22 @@ if (newProductsList) {
       </button>
     </article>
   `).join("");
+  }
+  if (promotionList) {
+  const promotions = products.filter(p => p.is_promotion === true);
+
+  promotionList.innerHTML = promotions.length
+    ? promotions.map(p => `
+        <article class="product">
+          <img src="${p.image_url || ''}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p class="price">${formatPrice(p.price)} Kz</p>
+          <button onclick="addToCart('${p.id}')">
+            Adicionar ao carrinho
+          </button>
+        </article>
+      `).join("")
+    : '<p class="empty">Em breve, teremos preços especiais para si!</p>';
   }
   if (!filtered.length) {
     list.innerHTML = '<p class="empty">Não encontrámos produtos com esse nome. Experimente outra pesquisa.</p>';
