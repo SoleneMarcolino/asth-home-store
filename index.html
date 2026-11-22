@@ -632,14 +632,19 @@ footer {
   <input id="delivery" type="date" required>
 
   <label for="payment-method">Forma de pagamento:</label>
-  <select id="payment-method" required>
+  <select id="payment-method" required onchange="showPaymentInstructions()">
     <option value="">Escolha como pretende pagar</option>
     <option value="Transferência bancária (BFA)">Transferência bancária (BFA)</option>
     <option value="Express">Express</option>
     <option value="PayPay">PayPay</option>
   </select>
 
-  <button type="submit">Preparar encomenda</button>
+<div id="payment-instructions" style="display:none;">
+  <h3>Instruções de pagamento</h3>
+  <p id="payment-message"></p>
+</div>
+
+<button type="submit">Preparar encomenda</button>
 
 </form>
     
@@ -984,7 +989,23 @@ function getCustomerLocation() {
     }
   );
   }
+function showPaymentInstructions() {
+  const method = document.getElementById("payment-method").value;
+  const instructions = document.getElementById("payment-instructions");
+  const message = document.getElementById("payment-message");
 
+  instructions.style.display = "block";
+
+  if (method === "Transferência bancária (BFA)") {
+    message.textContent = "Faça a transferência bancária para a conta da ASTH Home Store. Os dados bancários serão apresentados aqui.";
+  } else if (method === "Express") {
+    message.textContent = "As instruções para efectuar o pagamento pelo Express serão apresentadas aqui.";
+  } else if (method === "PayPay") {
+    message.textContent = "As instruções para efectuar o pagamento pelo PayPay serão apresentadas aqui.";
+  } else {
+    instructions.style.display = "none";
+  }
+  }
 async function sendOrder(event) {
   event.preventDefault();
 
