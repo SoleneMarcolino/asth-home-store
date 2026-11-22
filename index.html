@@ -521,16 +521,20 @@ function renderProducts() {
 if (categoryList) {
   categoryList.innerHTML = `
     <button
-  class="${String(selectedCategory) === String(c.id) ? 'active' : ''}"
-  onclick="filterCategory('${c.id}')">
-  ${c.name}
-</button>
+      class="${selectedCategory === '' ? 'active' : ''}"
+      onclick="filterCategory('')">
+      Todas
+    </button>
+
     ${categories.map(c => `
-      <button onclick="filterCategory('${c.id}')">${c.name}</button>
+      <button
+        class="${String(selectedCategory) === String(c.id) ? 'active' : ''}"
+        onclick="filterCategory('${c.id}')">
+        ${c.name}
+      </button>
     `).join("")}
   `;
 }
-
   if (!list) return;
 
   const normalizar = texto => String(texto || "")
