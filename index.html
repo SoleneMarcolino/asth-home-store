@@ -539,7 +539,7 @@ if (categoryList) {
 
   const filtered = products.filter(p =>
   normalizar(p.name).includes(search) &&
-  (!selectedCategory || p.category_id === selectedCategory)
+(!selectedCategory || String(p.category_id) === String(selectedCategory))
 );
 
   if (!filtered.length) {
