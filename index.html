@@ -23,8 +23,12 @@ body {
 header {
   background:var(--branco);
   text-align:center;
-  padding:25px 15px;
-  border-bottom:3px solid var(--bebe);
+  padding:18px 15px;
+  border-bottom:1px solid #e6edf5;
+  box-shadow:0 2px 12px rgba(16,43,85,0.06);
+  position:sticky;
+  top:0;
+  z-index:100;
 }
 .logo {
   font-family:Georgia,serif;
@@ -70,13 +74,24 @@ section { padding:25px 16px; }
 h2 { color:var(--azul); text-align:center; }
 .search {
   display:block;
-  width:100%;
+  width:90%;
   max-width:500px;
-  margin:15px auto;
-  padding:13px;
-  border:1px solid #cbd8e5;
-  border-radius:9px;
+  margin:18px auto 5px;
+  padding:14px 18px;
+  border:1px solid #dce6f0;
+  border-radius:25px;
   font-size:15px;
+  background:#f7faff;
+  color:var(--azul);
+  outline:none;
+  box-sizing:border-box;
+  transition:0.3s;
+}
+
+.search:focus {
+  border-color:var(--bebe);
+  background:var(--branco);
+  box-shadow:0 0 0 3px rgba(185,220,245,0.25);
 }
 .products {
   display:grid;
@@ -319,6 +334,7 @@ footer {
     <span>Home Store</span>
   </div>
   <div class="slogan">SUA CASA, NOSSA PAIXÃO.</div>
+  <input class="search" id="search" placeholder="Pesquisar produtos..." oninput="renderProducts()">
 </header>
 
 <nav>
@@ -338,7 +354,6 @@ footer {
 
 <section id="produtos">
   <h2>O nosso catálogo</h2>
-  <input class="search" id="search" placeholder="Pesquisar produtos..." oninput="renderProducts()">
   <div class="products" id="product-list"></div>
 </section>
 
