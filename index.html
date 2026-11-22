@@ -523,6 +523,31 @@ if (salesError) {
     (salesCount[item.product_id] || 0) + Number(item.quantity);
 });
   products = data;
+  const bestSellersList = document.getElementById("best-sellers");
+
+if (bestSellersList) {
+  const bestSellers = Object.entries(salesCount)
+    .map(([id, quantity]) => ({
+      product: products.find(p => String(p.id) === String(id)),
+      quantity
+    }))
+    .filter(item => item.product)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 3);
+
+  bestSellersList.innerHTML = bestSellers.length
+    ? bestSellersList.innerHTML = bestSellers.map(item => `
+        <article class="product">
+          <img src="${item.product.image_url || ''}" alt="${item.product.name}">
+          <h3>${item.product.name}</h3>
+          <p class="price">${formatPrice(item.product.price)} Kz</p>
+          <button onclick="addToCart('${item.product.id}')">
+            Adicionar ao carrinho
+          </button>
+        </article>
+      `).join("")
+    : '<p class="empty">Ainda não existem vendas pagas.</p>';
+}
   renderProducts();
 }
 
