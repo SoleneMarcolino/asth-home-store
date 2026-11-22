@@ -475,6 +475,12 @@ function renderProducts() {
     .trim();
 
   const search = normalizar(searchInput?.value || "");
+  if (search) {
+  document.getElementById("produtos").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+  }
 
   const filtered = products.filter(p =>
     normalizar(p.name).includes(search)
