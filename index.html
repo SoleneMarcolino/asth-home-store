@@ -393,6 +393,11 @@ footer {
   <p class="empty">Descubra os produtos que chegaram recentemente!</p>
   <div class="products" id="new-products"></div>
   </section>
+  <section id="mais-vendidos">
+  <h2>⭐ Mais vendidos</h2>
+  <p class="empty">Os favoritos dos nossos clientes!</p>
+  <div class="products" id="best-sellers"></div>
+  </section>
 <section id="produtos">
   <h2>O nosso catálogo</h2>
   <div class="products" id="product-list"></div>
@@ -503,7 +508,13 @@ categories = categoriesData || [];
   alert('Erro ao carregar produtos: ' + error.message);
   return;
   }
+const { data: salesData, error: salesError } = await supabaseClient
+  .from("order_items")
+  .select("product_id, quantity");
 
+if (salesError) {
+  console.error("Erro ao carregar vendas:", salesError);
+  }
   products = data;
   renderProducts();
 }
