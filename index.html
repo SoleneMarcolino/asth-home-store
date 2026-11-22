@@ -461,13 +461,27 @@ function formatPrice(value) {
   return value.toLocaleString("pt-PT");
 }
 
+
 function renderProducts() {
-  const search = document.getElementById("search")?.value.toLowerCase() || "";
+  const searchInput = document.getElementById("search");
   const list = document.getElementById("product-list");
-  const filtered = products.filter(p => p.name.toLowerCase().includes(search));
+
+  if (!list) return;
+
+  const normalizar = texto => String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+  const search = normalizar(searchInput?.value || "");
+
+  const filtered = products.filter(p =>
+    normalizar(p.name).includes(search)
+  );
 
   if (!filtered.length) {
-    list.innerHTML = '<p class="empty">Estamos a preparar o nosso catálogo. Volte em breve!</p>';
+    list.innerHTML = '<p class="empty">Não encontrámos produtos com esse nome. Experimente outra pesquisa.</p>';
     return;
   }
 
@@ -480,6 +494,7 @@ function renderProducts() {
     </article>
   `).join("");
 }
+  
 
 
 function addToCart(id) {
