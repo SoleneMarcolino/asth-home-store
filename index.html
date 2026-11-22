@@ -99,6 +99,12 @@ h2 { color:var(--azul); text-align:center; }
   background: var(--bebe);
   border-color: var(--bebe);
 }
+  .category-list button.active {
+  background: var(--azul);
+  color: #ffffff;
+  border-color: var(--azul);
+  font-weight: bold;
+  }
 .search {
   display:block;
   width:90%;
@@ -514,7 +520,11 @@ function renderProducts() {
 
 if (categoryList) {
   categoryList.innerHTML = `
-    <button onclick="filterCategory('')">Todas</button>
+    <button
+  class="${String(selectedCategory) === String(c.id) ? 'active' : ''}"
+  onclick="filterCategory('${c.id}')">
+  ${c.name}
+</button>
     ${categories.map(c => `
       <button onclick="filterCategory('${c.id}')">${c.name}</button>
     `).join("")}
