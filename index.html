@@ -606,6 +606,46 @@ footer {
 #consulta-form {
   scroll-margin-top: 100px;
 }
+  #order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  max-width: 650px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #dce6f1;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(16, 43, 85, 0.06);
+  text-align: left;
+}
+
+#order-form input,
+#order-form select,
+#order-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border: 1px solid #dce6f1;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 15px;
+}
+
+#order-form label {
+  color: #102b55;
+  font-weight: 600;
+}
+
+#order-form button[type="submit"] {
+  padding: 14px;
+  background: #102b55;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -703,8 +743,6 @@ footer {
 <section id="contactos">
   <h2>Faça a sua encomenda</h2>
   <form id="order-form" onsubmit="sendOrder(event)">
-  
-<form id="order-form" onsubmit="sendOrder(event)">
 
   <input id="customer" placeholder="Nome completo" required>
 
