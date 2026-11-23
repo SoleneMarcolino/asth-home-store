@@ -1270,6 +1270,7 @@ if (data.receipt_number) {
 }
 
 resultado.appendChild(card);
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
 });
   
 document.getElementById("comprovativo-form").addEventListener("submit", async function(event) {
