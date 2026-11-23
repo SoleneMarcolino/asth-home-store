@@ -683,6 +683,29 @@ footer {
 
       <button type="submit">Consultar encomenda</button>
     </form>
+    <div id="comprovativo-area">
+  <h3>Enviar comprovativo de pagamento</h3>
+
+  <p>
+    Depois de preencher a referência e o telefone acima,
+    seleccione o comprovativo do pagamento.
+  </p>
+
+  <form id="comprovativo-form">
+    <label for="comprovativo-file">Comprovativo (JPG, PNG ou PDF)</label>
+
+    <input
+      type="file"
+      id="comprovativo-file"
+      accept="image/jpeg,image/png,application/pdf"
+      required
+    >
+
+    <button type="submit">Enviar comprovativo</button>
+
+    <p id="comprovativo-status"></p>
+  </form>
+    </div>
 
     <div id="consulta-resultado"></div>
   </div>
@@ -1248,6 +1271,71 @@ if (data.receipt_number) {
 
 resultado.appendChild(card);
 });
+  
+document.getElementById("comprovativo-form").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const referencia = document.getElementById("consulta-referencia").value.trim();
+  const telefone = document.getElementById("consulta-telefone").value.trim();
+  const ficheiro = document.getElementById("comprovativo-file").files[0];
+  const estado = document.getElementById("comprovativo-status");
+  const botao = this.querySelector('button[type="submit"]');
+
+  if (!referencia || !telefone) {
+    estado.textContent = "Preencha primeiro a referência e o telefone.";
+    return;
+  }
+
+  if (!ficheiro) {
+    estado.textContent = "Seleccione o comprovativo.";
+    return;
+  }
+
+  if (ficheiro.size > 5 * 1024 * 1024) {
+    estado.textContent = "O ficheiro não pode ultrapassar 5 MB.";
+    return;
+  }
+
+  const formatos = ["image/jpeg", "image/png", "application/pdf"];
+
+  if (!formatos.includes(ficheiro.type)) {
+    estado.textContent = "Envie um ficheiro JPG, PNG ou PDF.";
+    return;
+  }
+
+  const formulario = new FormData();
+  formulario.append("reference", referencia);
+  formulario.append("phone", telefone);
+  formulario.append("file", ficheiro);
+
+  estado.textContent = "A enviar o comprovativo...";
+  botao.disabled = true;
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke(
+      "asth-comprovativos",
+      {
+        body: formulario
+      }
+    );
+
+    if (error) {
+      console.error(error);
+      estado.textContent = "Não foi possível enviar. Verifique os dados e tente novamente.";
+      return;
+    }
+
+    estado.textContent = data.message || "Comprovativo recebido com sucesso!";
+    this.reset();
+
+  } catch (error) {
+    console.error(error);
+    estado.textContent = "Ocorreu um erro ao enviar o comprovativo.";
+  } finally {
+    botao.disabled = false;
+  }
+});
+  
                                                           
 renderCart();
 </script>
