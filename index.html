@@ -1259,13 +1259,21 @@ if (data.receipt_number) {
   adicionarTexto(
     "div",
     "comprovativo",
-    "Comprovativo: " + data.receipt_number
+    "Número do recibo: " + data.receipt_number
+  );
+}
+
+if (data.receipt_uploaded) {
+  adicionarTexto(
+    "div",
+    "comprovativo",
+    "Comprovativo de pagamento: Enviado. Aguarda confirmação."
   );
 } else {
   adicionarTexto(
     "div",
     "comprovativo",
-    "O comprovativo estará disponível após a confirmação do pagamento."
+    "Comprovativo de pagamento: Ainda não enviado."
   );
 }
 
