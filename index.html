@@ -922,76 +922,80 @@ footer {
 let products = [];
   let categories = [];
 let selectedCategory = "";
-
 async function loadProducts() {
   const { data, error } = await supabaseClient
     .from('products')
     .select('id, name, description, price, image_url, is_promotion, is_available, category_id,created_at')
     .eq('is_available', true);
+
   const { data: categoriesData, error: categoriesError } = await supabaseClient
-  .from('categories')
-  .select('id, name');
+    .from('categories')
+    .select('id, name');
 
-if (categoriesError) {
-  console.error('Erro ao carregar categorias:', categoriesError);
-  return;
-}
+  if (categoriesError) {
+    console.error('Erro ao carregar categorias:', categoriesError);
+    return;
+  }
 
-categories = categoriesData || [];
+  categories = categoriesData || [];
 
   if (error) {
-  console.error('Erro ao carregar produtos:', error);
-  alert('Erro ao carregar produtos: ' + error.message);
-  return;
+    console.error('Erro ao carregar produtos:', error);
+    alert('Erro ao carregar produtos: ' + error.message);
+    return;
   }
-const { data: salesData, error: salesError } = await supabaseClient
-  .from("order_items")
-  .select("product_id, quantity, orders!inner(payment_status)")
-  .eq("orders.payment_status", "Pago");
 
-if (salesError) {
-  console.error("Erro ao carregar vendas:", salesError);
+  const { data: salesData, error: salesError } = await supabaseClient
+    .from("order_items")
+    .select("product_id, quantity, orders!inner(payment_status)")
+    .eq("orders.payment_status", "Pago");
+
+  if (salesError) {
+    console.error("Erro ao carregar vendas:", salesError);
   }
+
   const salesCount = {};
 
-(salesData || []).forEach(item => {
-  salesCount[item.product_id] =
-    (salesCount[item.product_id] || 0) + Number(item.quantity);
-});
+  (salesData || []).forEach(item => {
+    salesCount[item.product_id] =
+      (salesCount[item.product_id] || 0) + Number(item.quantity);
+  });
+
   products = data;
+
   const bestSellersList = document.getElementById("best-sellers");
 
-if (bestSellersList) {
-  const bestSellers = Object.entries(salesCount)
-    .map(([id, quantity]) => ({
-      product: products.find(p => String(p.id) === String(id)),
-      quantity
-    }))
-    .filter(item => item.product)
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 3);
+  if (bestSellersList) {
+    const bestSellers = Object.entries(salesCount)
+      .map(([id, quantity]) => ({
+        product: products.find(p => String(p.id) === String(id)),
+        quantity
+      }))
+      .filter(item => item.product)
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 3);
 
-  bestSellersList.innerHTML = bestSellers.length
-    ? bestSellers.map(item => `
-        <article class="product">
-          <img src="${item.product.image_url || ''}" alt="${item.product.name}">
-          <h3>${item.product.name}</h3>
-          <p class="price">${formatPrice(item.product.price)} Kz</p>
-          <button onclick="addToCart('${item.product.id}')">
-            Adicionar ao carrinho
-          </button>
-        </article>
-      `).join("")
-    : '<p class="empty">Ainda não existem vendas pagas.</p>';
-}
+    bestSellersList.innerHTML = bestSellers.length
+      ? bestSellers.map(item => `
+          <article class="product">
+            <img src="${item.product.image_url || ''}" alt="${item.product.name}">
+            <h3>${item.product.name}</h3>
+            <p class="price">${formatPrice(item.product.price)} Kz</p>
+            <button onclick="addToCart('${item.product.id}')">
+              Adicionar ao carrinho
+            </button>
+          </article>
+        `).join("")
+      : '<p class="empty">Ainda não existem vendas pagas.</p>';
+  }
+
   renderProducts();
 }
 
 let cart = [];
-
-function formatPrice(value) {
-  return value.toLocaleString("pt-PT");
-}
+  function formatPrice(value) {
+  return Number(value).toLocaleString("pt-PT");
+  }
 
 function filterCategory(categoryId) {
   selectedCategory = categoryId;
