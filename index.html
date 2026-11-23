@@ -665,13 +665,22 @@ footer {
 }
 
 #contactos a {
+  display: block;
+  max-width: 320px;
+  margin: 12px auto;
+  padding: 14px;
+  background: #f5f8fc;
+  border: 1px solid #dce6f1;
+  border-radius: 12px;
   color: #102b55;
   font-weight: 600;
   text-decoration: none;
+  transition: 0.3s;
 }
 
 #contactos a:hover {
-  color: #7bb8e5;
+  background: #b9dcf5;
+  color: #102b55;
 }
 </style>
 </head>
@@ -767,7 +776,7 @@ footer {
   </div>
 </section>
 
-<section id="contactos">
+<section id="encomenda">
   <h2>Faça a sua encomenda</h2>
   <form id="order-form" onsubmit="sendOrder(event)">
 
@@ -822,6 +831,26 @@ footer {
     
   <p class="empty">ASTH Home Store — Angola</p>
 </section>
+  <section id="contactos">
+  <h2>Entre em contacto connosco</h2>
+
+  <p>A sua satisfação é a nossa prioridade. Estamos disponíveis para ajudar a tornar a sua casa ainda mais especial.</p>
+
+  <a href="https://wa.me/244951439119" target="_blank">
+    Falar connosco pelo WhatsApp
+  </a>
+
+  <a href="https://www.instagram.com/asth_homestore/" target="_blank">
+    Seguir no Instagram
+  </a>
+
+  <a href="mailto:solenealberto@gmail.com">
+    Enviar e-mail
+  </a>
+
+  <p>ASTH Home Store — Angola</p>
+  <p>SUA CASA, NOSSA PAIXÃO.</p>
+  </section>
 
 </main>
 
