@@ -1118,6 +1118,35 @@ adicionarTexto("h3", "", "📦 Encomenda encontrada!");
 
 adicionarTexto("div", "info", "Referência: " + data.reference);
 adicionarTexto("div", "info", "Cliente: " + data.customer_name);
+  adicionarTexto(
+  "div",
+  "info",
+  "Modalidade de entrega: " + (data.delivery_type || "Não indicada")
+);
+
+adicionarTexto(
+  "div",
+  "info",
+  "Preferência de levantamento: " + (data.pickup_preference || "Não indicada")
+);
+
+adicionarTexto(
+  "div",
+  "info",
+  "Morada: " + (data.address || "Não indicada")
+);
+
+adicionarTexto(
+  "div",
+  "info",
+  "Data preferida: " + (data.delivery_date || "Não indicada")
+);
+
+adicionarTexto(
+  "div",
+  "info",
+  "Forma de pagamento: " + (data.payment_method || "Não indicada")
+);
 
 const estado = (data.status || "Pendente")
   .toLowerCase()
