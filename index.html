@@ -1147,7 +1147,25 @@ adicionarTexto(
   "info",
   "Forma de pagamento: " + (data.payment_method || "Não indicada")
 );
+if (data.latitude && data.longitude) {
+  const mapa = document.createElement("a");
 
+  mapa.href = "https://www.google.com/maps?q=" +
+    data.latitude + "," + data.longitude;
+
+  mapa.textContent = "📍 Ver localização no Google Maps";
+  mapa.target = "_blank";
+  mapa.rel = "noopener noreferrer";
+  mapa.className = "info";
+
+  card.appendChild(mapa);
+} else {
+  adicionarTexto(
+    "div",
+    "info",
+    "O cliente não partilhou a localização GPS."
+  );
+  }
 const estado = (data.status || "Pendente")
   .toLowerCase()
   .normalize("NFD")
