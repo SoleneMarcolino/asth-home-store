@@ -1830,13 +1830,19 @@ function changeQuantity(id, variation) {
 }
   
   
+
 function checkout() {
   if (!cart.length) {
     alert("Adicione produtos ao carrinho primeiro.");
     return;
   }
-  document.getElementById("contactos").scrollIntoView({behavior:"smooth"});
+
+  document.getElementById("encomenda").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
+
 function getCustomerLocation() {
   const status = document.getElementById("location-status");
 
