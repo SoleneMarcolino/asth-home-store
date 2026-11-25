@@ -87,35 +87,69 @@ nav a:hover {
   background: var(--bebe);
   color: var(--azul);
 }
+
 .hero {
-  background: linear-gradient(135deg, #d9edfb, #ffffff);
-  text-align: center;
-  padding: 60px 20px;
-  border-radius: 16px;
+  background: linear-gradient(135deg, #d9edfb 0%, #f4f9fd 55%, #ffffff 100%);
+  text-align: left;
+  padding: 45px 25px;
+  border-radius: 22px;
   margin: 15px auto;
   max-width: 1000px;
+  min-height: 230px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  box-shadow: 0 5px 20px rgba(16, 43, 85, 0.07);
 }
+
+.hero-content {
+  max-width: 570px;
+}
+
 .hero h1 {
-  color: var(--azul);
-  font-size: 30px;
-  line-height: 1.3;
-  margin-bottom: 15px;
+  color: #102b55;
+  font-size: 32px;
+  line-height: 1.25;
+  font-weight: 700;
+  margin: 0 0 15px;
+  max-width: 520px;
 }
+
+
 .hero p {
   line-height: 1.7;
-  font-size: 16px;
-  color: #40536b;
-  margin-bottom: 22px;
-}
-  .hero button {
-  background: var(--azul);
-  color: white;
-  padding: 14px 25px;
-  border-radius: 25px;
   font-size: 15px;
-  font-weight: bold;
-  box-shadow: 0 4px 10px rgba(16,43,85,0.15);
-  }
+  color: #52657d;
+  margin: 0 0 24px;
+  max-width: 480px;
+}
+
+.hero-label {
+  display: inline-block;
+  color: #3979aa;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+  
+  
+.hero button {
+  background: #102b55;
+  color: #ffffff;
+  padding: 14px 26px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 5px 14px rgba(16, 43, 85, 0.16);
+  transition: 0.3s ease;
+}
+
+.hero button:hover {
+  background: #83b9df;
+  color: #102b55;
+}
   .sexta-banner {
   background: linear-gradient(135deg, #102b55, #244b7c);
   color: #ffffff;
@@ -179,6 +213,21 @@ h2 { color:var(--azul); text-align:center; }
     gap: 10px;
   }
 
+  
+.hero {
+  padding: 30px 20px;
+  min-height: 190px;
+  border-radius: 18px;
+}
+
+.hero h1 {
+  font-size: 25px;
+}
+
+.hero p {
+  font-size: 14px;
+}
+  
   .category-list {
     max-width: 105px;
     padding: 7px;
@@ -859,10 +908,22 @@ footer {
   </a>
 </div>
 <main>
+
 <section class="hero" id="inicio">
-  <h1>A sua casa merece ser especial!</h1>
-  <p>Tudo pensado para tornar a sua casa ainda mais especial.</p>
-  <a href="#produtos"><button>Explorar produtos</button></a>
+  <div class="hero-content">
+    <span class="hero-label">ASTH HOME STORE</span>
+
+    <h1>A sua casa merece ser o seu lugar favorito!</h1>
+
+    <p>
+      Descubra produtos pensados para organizar,
+      decorar e tornar a sua casa ainda mais especial.
+    </p>
+
+    <a href="#produtos">
+      <button type="button">Explorar produtos →</button>
+    </a>
+  </div>
 </section>
 
 <section id="categorias">
