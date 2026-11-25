@@ -1487,9 +1487,47 @@ footer {
 
 <button type="submit">Preparar encomenda</button>
 
+
 </form>
-    
-  <p class="empty">ASTH Home Store — Angola</p>
+
+<!-- ÁREA DE PAGAMENTO APÓS A ENCOMENDA -->
+<div id="checkout-payment" style="display: none;">
+
+  <h2>Pagamento da encomenda</h2>
+
+  <p>A sua encomenda foi registada com sucesso!</p>
+
+  <div class="payment-order-info">
+    <p>Referência: <strong id="checkout-reference"></strong></p>
+    <p>Total a pagar: <strong id="checkout-total"></strong></p>
+    <p>Forma de pagamento: <strong id="checkout-method"></strong></p>
+  </div>
+
+  <h3>Enviar comprovativo de pagamento</h3>
+
+  <p>Seleccione o comprovativo do pagamento realizado.</p>
+
+  <form id="checkout-receipt-form">
+    <label for="checkout-receipt-file">
+      Comprovativo (JPG, PNG ou PDF)
+    </label>
+
+    <input
+      type="file"
+      id="checkout-receipt-file"
+      accept="image/jpeg,image/png,application/pdf"
+      required
+    >
+
+    <button type="submit">Enviar comprovativo</button>
+
+    <p id="checkout-receipt-status"></p>
+  </form>
+
+</div>
+
+<p class="empty">ASTH Home Store — Angola</p>
+
 </section>
   <section id="contactos">
   <h2>Entre em contacto connosco</h2>
@@ -1653,6 +1691,8 @@ async function loadProducts() {
 }
 
 let cart = [];
+  let checkoutOrderReference = "";
+let checkoutOrderPhone = "";
   function formatPrice(value) {
   return Number(value).toLocaleString("pt-PT");
   }
@@ -1929,6 +1969,8 @@ async function sendOrder(event) {
     alert("Erro ao registar encomenda: " + orderError.message);
     return;
   }
+  checkoutOrderReference = savedOrder.customer_reference;
+checkoutOrderPhone = order.phone;
 
   const orderItems = cart.map(p => ({
     order_id: savedOrder.id,
@@ -1947,15 +1989,30 @@ async function sendOrder(event) {
     return;
   }
 
-  alert(
-    "Encomenda enviada com sucesso na ASTH!\n\n" +
-    "A sua referência é: " + savedOrder.customer_reference +
-    "\n\nGuarde esta referência para consultar a sua encomenda."
-  );
+  
+document.getElementById("checkout-reference").textContent =
+  savedOrder.customer_reference;
 
-  document.getElementById("order-form").reset();
-  cart = [];
-  renderCart();
+document.getElementById("checkout-total").textContent =
+  Number(order.total).toLocaleString("pt-AO") + " Kz";
+
+document.getElementById("checkout-method").textContent =
+  order.payment_method;
+
+document.getElementById("order-form").style.display = "none";
+
+document.getElementById("checkout-payment").style.display = "block";
+
+document.getElementById("order-form").reset();
+
+cart = [];
+renderCart();
+
+document.getElementById("checkout-payment").scrollIntoView({
+  behavior: "smooth",
+  block: "start"
+});
+
 }
   
 
@@ -2207,6 +2264,69 @@ document.getElementById("comprovativo-form").addEventListener("submit", async fu
     botao.disabled = false;
   }
 });
+  
+document.getElementById("checkout-receipt-form").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const ficheiro = document.getElementById("checkout-receipt-file").files[0];
+  const estado = document.getElementById("checkout-receipt-status");
+  const botao = this.querySelector('button[type="submit"]');
+
+  if (!checkoutOrderReference || !checkoutOrderPhone) {
+    estado.textContent = "Não foi possível identificar a encomenda.";
+    return;
+  }
+
+  if (!ficheiro) {
+    estado.textContent = "Seleccione o comprovativo.";
+    return;
+  }
+
+  if (ficheiro.size > 5 * 1024 * 1024) {
+    estado.textContent = "O ficheiro não pode ultrapassar 5 MB.";
+    return;
+  }
+
+  const formatos = ["image/jpeg", "image/png", "application/pdf"];
+
+  if (!formatos.includes(ficheiro.type)) {
+    estado.textContent = "Envie um ficheiro JPG, PNG ou PDF.";
+    return;
+  }
+
+  const formulario = new FormData();
+  formulario.append("reference", checkoutOrderReference);
+  formulario.append("phone", checkoutOrderPhone);
+  formulario.append("file", ficheiro);
+
+  estado.textContent = "A enviar o comprovativo...";
+  botao.disabled = true;
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke(
+      "asth-comprovativos",
+      {
+        body: formulario
+      }
+    );
+
+    if (error) {
+      console.error(error);
+      estado.textContent = "Não foi possível enviar. Tente novamente.";
+      return;
+    }
+
+    estado.textContent = data.message || "Comprovativo recebido com sucesso!";
+    this.reset();
+
+  } catch (error) {
+    console.error(error);
+    estado.textContent = "Ocorreu um erro ao enviar o comprovativo.";
+  } finally {
+    botao.disabled = false;
+  }
+});
+
   
                                                           
 renderCart();
