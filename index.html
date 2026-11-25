@@ -1034,12 +1034,6 @@ if (categoryList) {
     .trim();
 
   const search = normalizar(searchInput?.value || "");
-  if (search) {
-  document.getElementById("produtos").scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-  }
 
   const filtered = products.filter(p =>
   normalizar(p.name).includes(search) &&
@@ -1565,6 +1559,73 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_KEY
 );
   loadProducts();
+</script>
+  
+<script>
+(function () {
+  const ecras = {
+    inicio: [
+      "inicio",
+      "novidades",
+      "mais-vendidos",
+      "sexta-preco-especial",
+      "sexta-do-preco-especial"
+    ],
+    categorias: ["categorias", "produtos"],
+    ofertas: ["promocoes"],
+    carrinho: ["carrinho", "encomenda"],
+    conta: ["consultar-encomenda", "contactos"]
+  };
+
+  const destinos = {
+    "#inicio": "inicio",
+    "#categorias": "categorias",
+    "#produtos": "categorias",
+    "#promocoes": "ofertas",
+    "#carrinho": "carrinho",
+    "#encomenda": "carrinho",
+    "#consulta-form": "conta",
+    "#consultar-encomenda": "conta",
+    "#contactos": "conta"
+  };
+
+  const secoes = document.querySelectorAll(
+    "main > section, body > section"
+  );
+
+  const rodape = document.querySelector("footer");
+
+  function mostrarEcrã(nome) {
+    const visiveis = ecras[nome] || ecras.inicio;
+
+    secoes.forEach(secao => {
+      secao.style.display = visiveis.includes(secao.id)
+        ? ""
+        : "none";
+    });
+
+    if (rodape) {
+      rodape.style.display = nome === "conta" ? "" : "none";
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener("click", function (evento) {
+    const link = evento.target.closest('a[href^="#"]');
+
+    if (!link) return;
+
+    const destino = destinos[link.getAttribute("href")];
+
+    if (!destino) return;
+
+    evento.preventDefault();
+    mostrarEcrã(destino);
+  });
+
+  mostrarEcrã("inicio");
+})();
 </script>
   
 </body>
