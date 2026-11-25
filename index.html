@@ -20,35 +20,44 @@ body {
   background:var(--fundo);
   color:#26364a;
 }
+
 header {
-  background:var(--branco);
-  text-align:center;
-  padding:18px 15px;
-  border-bottom:1px solid #e6edf5;
-  box-shadow:0 2px 12px rgba(16,43,85,0.06);
-  position:sticky;
-  top:0;
-  z-index:100;
+  background: #ffffff;
+  text-align: center;
+  padding: 16px 15px 14px;
+  border-bottom: 1px solid #e6edf5;
+  box-shadow: 0 3px 14px rgba(16, 43, 85, 0.07);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
+
 .logo {
-  font-family:Georgia,serif;
-  font-size:36px;
-  font-weight:bold;
-  color:var(--azul);
+  font-family: Georgia, serif;
+  font-size: 35px;
+  font-weight: bold;
+  color: #102b55;
+  letter-spacing: 1px;
+  line-height: 1.1;
 }
+
 .logo span {
-  display:block;
-  font-family:cursive;
-  font-size:19px;
-  color:#83b9df;
-  font-weight:normal;
+  display: block;
+  font-family: cursive;
+  font-size: 19px;
+  color: #83b9df;
+  font-weight: normal;
+  margin-top: 3px;
 }
+
 .slogan {
-  font-size:11px;
-  letter-spacing:2px;
-  color:var(--azul);
-  margin-top:8px;
-}nav {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #102b55;
+  margin-top: 7px;
+  font-weight: 600;
+}
+nav {
   display: flex;
   justify-content: flex-start;
   flex-wrap: nowrap;
@@ -145,52 +154,120 @@ h2 { color:var(--azul); text-align:center; }
   scrollbar-width: none;
 }
 
+.catalog-layout {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.catalog-products {
+  min-width: 0;
+}
+
+.catalog-products h2 {
+  text-align: left;
+  margin-top: 10px;
+}
+
+@media (max-width: 767px) {
+  .catalog-layout {
+    grid-template-columns: 105px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .category-list {
+    max-width: 105px;
+    padding: 7px;
+  }
+
+  .category-list button {
+    font-size: 11px;
+    padding: 11px 6px;
+  }
+
+  .catalog-products .products {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .catalog-products .product {
+    padding: 8px;
+  }
+
+  .catalog-products .product img {
+    height: 115px;
+  }
+}
+  
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 220px;
+  padding: 12px;
+  background: #f5f9fd;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+  
 .category-list::-webkit-scrollbar {
   display: none;
 }
 
+
 .category-list button {
+  width: 100%;
   flex-shrink: 0;
-  padding: 11px 18px;
-  border: 1px solid #dce6f0;
-  border-radius: 25px;
+  padding: 13px 12px;
+  border: 1px solid #e1eaf3;
+  border-radius: 12px;
   background: #ffffff;
-  color: var(--azul);
-  font-size: 14px;
+  color: #102b55;
+  font-size: 13px;
+  text-align: left;
   cursor: pointer;
+  transition: 0.25s ease;
 }
 
 .category-list button:hover {
-  background: var(--bebe);
-  border-color: var(--bebe);
+  background: #e8f4fc;
+  border-color: #83b9df;
 }
-  .category-list button.active {
-  background: var(--azul);
+
+.category-list button.active {
+  background: #102b55;
   color: #ffffff;
-  border-color: var(--azul);
+  border-color: #102b55;
   font-weight: bold;
-  }
+}
+
 .search {
-  display:block;
-  width:90%;
-  max-width:500px;
-  margin:18px auto 5px;
-  padding:14px 18px;
-  border:1px solid #dce6f0;
-  border-radius:25px;
-  font-size:15px;
-  background:#f7faff;
-  color:var(--azul);
-  outline:none;
-  box-sizing:border-box;
-  transition:0.3s;
+  display: block;
+  width: 92%;
+  max-width: 520px;
+  margin: 15px auto 3px;
+  padding: 13px 18px;
+  border: 1px solid #dce6f0;
+  border-radius: 30px;
+  font-size: 14px;
+  background: #f5f9fd;
+  color: #102b55;
+  outline: none;
+  box-sizing: border-box;
+  transition: 0.3s;
 }
 
 .search:focus {
-  border-color:var(--bebe);
-  background:var(--branco);
-  box-shadow:0 0 0 3px rgba(185,220,245,0.25);
+  border-color: #83b9df;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(185, 220, 245, 0.25);
 }
+
 .products {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -204,51 +281,67 @@ h2 { color:var(--azul); text-align:center; }
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   }
+
 .product {
   background: #ffffff;
   border: 1px solid #e6edf5;
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 18px;
+  padding: 12px;
   text-align: center;
-  box-shadow: 0 3px 12px rgba(16,43,85,0.06);
-  transition: 0.3s;
+  box-shadow: 0 4px 16px rgba(16, 43, 85, 0.07);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+
+.product:active {
+  transform: scale(0.98);
+}
+
 .product img {
   width: 100%;
   height: 165px;
   object-fit: contain;
-  border-radius: 10px;
-  background: #f5f8fc;
-  padding: 5px;
+  border-radius: 13px;
+  background: #f5f9fd;
+  padding: 6px;
+  box-sizing: border-box;
 }
+
 .product h3 {
-  font-size: 15px;
-  color: var(--azul);
+  font-size: 14px;
+  color: #102b55;
   line-height: 1.4;
-  min-height: 42px;
+  min-height: 40px;
   margin: 12px 0 8px;
 }
+
 .product .price {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: bold;
   color: #102b55;
   margin: 10px 0 14px;
 }
+
+
 button {
-  background: var(--azul);
-  color: white;
-  border: 0;
-  border-radius: 9px;
+  background: #102b55;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
   padding: 12px 16px;
   cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 9px rgba(16, 43, 85, 0.12);
 }
-  button:hover {
-  background: #b9dcf5;
+
+button:hover {
+  background: #83b9df;
   color: #102b55;
   transform: translateY(-2px);
-  }
+  box-shadow: 0 5px 12px rgba(16, 43, 85, 0.15);
+}
+
 .secondary { background:#8bbfe5; color:#102b55; }
 .empty { text-align:center; padding:25px; color:#64748b; }
 .cart {
@@ -750,10 +843,14 @@ footer {
   <p>Tudo pensado para tornar a sua casa ainda mais especial.</p>
   <a href="#produtos"><button>Explorar produtos</button></a>
 </section>
+
 <section id="categorias">
   <h2>Comprar por categoria</h2>
-  <div class="category-list" id="category-list"></div>
+
+  <div class="catalog-layout">
+    <div class="category-list" id="category-list"></div>
 </section>
+
   <section id="novidades">
   <h2>✨ Novidades</h2>
   <p class="empty">Descubra os produtos que chegaram recentemente!</p>
@@ -764,10 +861,14 @@ footer {
   <p class="empty">Os favoritos dos nossos clientes!</p>
   <div class="products" id="best-sellers"></div>
   </section>
-<section id="produtos">
+
+<div class="catalog-products">
   <h2>O nosso catálogo</h2>
   <div class="products" id="product-list"></div>
+</div>
+</div>
 </section>
+
 <section id="sexta-especial">
   <div class="sexta-banner">
     <p>✨ TODA SEXTA-FEIRA ✨</p>
