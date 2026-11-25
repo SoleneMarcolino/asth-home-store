@@ -1828,10 +1828,8 @@ function changeQuantity(id, variation) {
 
   renderCart();
 }
-  
-  
 
-function checkout() {
+window.checkout = function() {
   if (!cart.length) {
     alert("Adicione produtos ao carrinho primeiro.");
     return;
@@ -1841,7 +1839,7 @@ function checkout() {
     behavior: "smooth",
     block: "start"
   });
-}
+};
 
 function getCustomerLocation() {
   const status = document.getElementById("location-status");
