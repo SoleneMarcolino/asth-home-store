@@ -722,13 +722,109 @@ footer {
   display: none;
 }
 
+
 @media (max-width: 767px) {
-  body {
-    padding-bottom: 90px;
-    
+
   body {
     padding-bottom: 110px;
   }
+
+  #novidades .products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  #novidades .product {
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  #novidades .product img {
+    height: 110px;
+    object-fit: contain;
+  }
+
+  #mais-vendidos .products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  #mais-vendidos .product {
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  #mais-vendidos .product img {
+    height: 110px;
+    object-fit: contain;
+  }
+
+}
+
+
+    
+#novidades {
+  padding: 30px 15px;
+  margin: 20px auto;
+  max-width: 1100px;
+  background: #ffffff;
+  border-radius: 20px;
+}
+
+#novidades h2 {
+  color: #102b55;
+  font-size: 23px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+#novidades .empty {
+  color: #718096;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+    #novidades h2::after {
+  content: "";
+  display: block;
+  width: 45px;
+  height: 3px;
+  background: #83b9df;
+  border-radius: 5px;
+  margin-top: 9px;
+    }
+    
+#mais-vendidos {
+  padding: 30px 15px;
+  margin: 20px auto;
+  max-width: 1100px;
+  background: #f4f9fd;
+  border-radius: 20px;
+}
+
+#mais-vendidos h2 {
+  color: #102b55;
+  font-size: 23px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+#mais-vendidos .empty {
+  color: #718096;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+#mais-vendidos h2::after {
+  content: "";
+  display: block;
+  width: 45px;
+  height: 3px;
+  background: #83b9df;
+  border-radius: 5px;
+  margin-top: 9px;
+}
     
   }
 
