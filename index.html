@@ -1684,6 +1684,7 @@ function renderProducts() {
   const categoryList = document.getElementById("category-list");
   const promotionList = document.getElementById("promotion-list");
   const newProductsList = document.getElementById("new-products");
+  const bestSellersList = document.getElementById("best-sellers");
 
 if (categoryList) {
   categoryList.innerHTML = `
@@ -1724,6 +1725,24 @@ if (newProductsList) {
     .slice(0, 4);
 
   newProductsList.innerHTML = latestProducts.map(p => `
+    <article class="product">
+      <img src="${p.image_url || ''}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <p class="price">${formatPrice(p.price)} Kz</p>
+      <button onclick="addToCart('${p.id}')">
+        Adicionar ao carrinho
+      </button>
+    </article>
+  `).join("");
+  }
+  if (bestSellersList) {
+  const bestSellers = [...products]
+    .sort((a, b) =>
+      new Date(b.created_at) - new Date(a.created_at)
+    )
+    .slice(0, 4);
+
+  bestSellersList.innerHTML = bestSellers.map(p => `
     <article class="product">
       <img src="${p.image_url || ''}" alt="${p.name}">
       <h3>${p.name}</h3>
