@@ -1916,22 +1916,39 @@ function getCustomerLocation() {
   );
   }
 function showPaymentInstructions() {
+
+function showPaymentInstructions() {
   const method = document.getElementById("payment-method").value;
   const instructions = document.getElementById("payment-instructions");
   const message = document.getElementById("payment-message");
 
-  instructions.style.display = "block";
-
   if (method === "Transferência bancária (BFA)") {
-    message.textContent = "Faça a transferência bancária para a conta da ASTH Home Store. Os dados bancários serão apresentados aqui.";
+    message.innerHTML = `
+      <strong>Banco:</strong> BFA<br>
+      <strong>Beneficiário:</strong> ASTH Home Store<br>
+      <strong>IBAN:</strong> [PREENCHER NO TEU DISPOSITIVO]<br>
+      <p>O beneficiário da conta é o titular responsável pela loja.</p>
+    `;
   } else if (method === "Express") {
-    message.textContent = "As instruções para efectuar o pagamento pelo Express serão apresentadas aqui.";
+    message.innerHTML = `
+      <strong>Pagamento:</strong> Express<br>
+      <strong>Número:</strong> [PREENCHER NO TEU DISPOSITIVO]<br>
+      <strong>Titular:</strong> [PREENCHER NO TEU DISPOSITIVO]
+    `;
   } else if (method === "PayPay") {
-    message.textContent = "As instruções para efectuar o pagamento pelo PayPay serão apresentadas aqui.";
+    message.innerHTML = `
+      <strong>Pagamento:</strong> PayPay<br>
+      <strong>Dados de pagamento:</strong> [PREENCHER NO TEU DISPOSITIVO]
+    `;
   } else {
     instructions.style.display = "none";
+    message.innerHTML = "";
+    return;
   }
-  }
+
+  instructions.style.display = "block";
+}
+
 async function sendOrder(event) {
   event.preventDefault();
 
