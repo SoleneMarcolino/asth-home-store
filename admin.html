@@ -76,6 +76,45 @@ table { width:100%; border-collapse:collapse; }
 th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
 .table-wrap { overflow-x:auto; }
 #message { color:#a12626; }
+  .product-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+  align-items: center;
+}
+
+.product-filters input,
+.product-filters select {
+  flex: 1;
+  min-width: 180px;
+  padding: 12px;
+  border: 1px solid #ccd6e0;
+  border-radius: 8px;
+  background: white;
+  color: #17365d;
+  font-size: 14px;
+}
+
+.product-filters input:focus,
+.product-filters select:focus {
+  outline: none;
+  border-color: #6c9bc5;
+  box-shadow: 0 0 0 2px rgba(108, 155, 197, 0.15);
+}
+
+@media (max-width: 600px) {
+  .product-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .product-filters input,
+  .product-filters select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+              }
 </style>
 </head>
 <body>
@@ -110,6 +149,26 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
     <div class="card">
       <h2>Produtos</h2>
       <button onclick="loadAdminData()">Actualizar dados</button>
+      <div class="product-filters">
+  <input
+    type="text"
+    id="productSearch"
+    placeholder="Pesquisar produto pelo nome..."
+    oninput="filterProducts()"
+  >
+
+  <select id="productAvailabilityFilter" onchange="filterProducts()">
+    <option value="todos">Todos os produtos</option>
+    <option value="disponiveis">Disponíveis</option>
+    <option value="indisponiveis">Indisponíveis</option>
+  </select>
+
+  <select id="productPromotionFilter" onchange="filterProducts()">
+    <option value="todos">Todas as ofertas</option>
+    <option value="promocao">Em promoção</option>
+    <option value="normal">Sem promoção</option>
+  </select>
+      </div>
       <div class="table-wrap">
         <h2>Adicionar novo produto</h2>
 
@@ -216,10 +275,10 @@ async function login() {
   document.getElementById("dashboard").classList.remove("hidden");
   await loadAdminData();
 } 
-
+let allAdminProducts = [];
 async function loadAdminData() {
   const [products, orders, categories] = await Promise.all([
-    supabaseClient.from("products").select("id,name,price,is_available,stock"),
+    supabaseClient.from("products").select("id,name,price,is_available,stock,is_promotion"),
     supabaseClient.from("orders").select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date,receipt_number"),
     supabaseClient.from("categories").select("id,name")
   ]);
@@ -252,27 +311,9 @@ categorySelect.innerHTML =
   categories.data.map(c =>
     `<option value="${c.id}">${escapeHTML(c.name)}</option>`
   ).join("");
-  document.getElementById("productCount").textContent = products.data.length;
-  document.getElementById("orderCount").textContent = orders.data.length;
-  document.getElementById("categoryCount").textContent = categories.data.length;
-
-
-document.getElementById("productsTable").innerHTML =
-  products.data.map(p => `
-    <tr>
-      <td>${escapeHTML(p.name)}</td>
-      <td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
-      <td>${p.is_available ? "Sim" : "Não"}</td>
-      <td>${Number(p.stock || 0)} unidades</td>
-      <td>
-        <button onclick="editProduct('${p.id}')">Editar</button>
-        <button onclick="deleteProduct('${p.id}')">Eliminar</button>
-        <button onclick="updateProductStock('${p.id}', ${Number(p.stock || 0)})">
-          Actualizar stock
-        </button>
-      </td>
-    </tr>
-  `).join("");
+  
+allAdminProducts = products.data || [];
+filterProducts();
 
 document.getElementById("ordersTable").innerHTML =
   orders.data.map(o => {
@@ -349,6 +390,52 @@ document.getElementById("ordersTable").innerHTML =
     `;
   }).join("");
 }
+  function filterProducts() {
+  const search = document.getElementById("productSearch").value
+    .trim()
+    .toLowerCase();
+
+  const availability = document.getElementById("productAvailabilityFilter").value;
+  const promotion = document.getElementById("productPromotionFilter").value;
+
+  const filteredProducts = allAdminProducts.filter(p => {
+    const matchesSearch = (p.name || "").toLowerCase().includes(search);
+
+    const matchesAvailability =
+      availability === "todos" ||
+      (availability === "disponiveis" && p.is_available) ||
+      (availability === "indisponiveis" && !p.is_available);
+
+    const matchesPromotion =
+      promotion === "todos" ||
+      (promotion === "promocao" && p.is_promotion) ||
+      (promotion === "normal" && !p.is_promotion);
+
+    return matchesSearch && matchesAvailability && matchesPromotion;
+  });
+
+  document.getElementById("productsTable").innerHTML =
+    filteredProducts.map(p => `
+      <tr>
+        <td>${escapeHTML(p.name)}</td>
+        <td>${Number(p.price).toLocaleString("pt-PT")} Kz</td>
+        <td>${p.is_available ? "Sim" : "Não"}</td>
+        <td>${Number(p.stock || 0)} unidades</td>
+        <td>
+          <button onclick="editProduct('${p.id}')">Editar</button>
+          <button onclick="deleteProduct('${p.id}')">Eliminar</button>
+          <button onclick="updateProductStock('${p.id}', ${Number(p.stock || 0)})">
+            Actualizar stock
+          </button>
+        </td>
+      </tr>
+    `).join("");
+
+  if (filteredProducts.length === 0) {
+    document.getElementById("productsTable").innerHTML =
+      '<tr><td colspan="5">Nenhum produto encontrado.</td></tr>';
+  }
+  }
 async function addProduct() {
   const name = document.getElementById("productName").value.trim();
   const description = document.getElementById("productDescription").value.trim();
@@ -359,10 +446,25 @@ async function addProduct() {
   const is_promotion = document.getElementById("productPromotion").checked;
   const is_available = document.getElementById("productAvailable").checked;
 
-  if (!name || !price || price <= 0 || !category_id) {
-    alert("Preenche o nome, o preço e a categoria do produto.");
-    return;
-  }
+  if (!name) {
+  alert("Indica o nome do produto.");
+  return;
+}
+
+if (!Number.isFinite(price) || price <= 0) {
+  alert("O preço deve ser superior a zero.");
+  return;
+}
+
+if (!Number.isInteger(stock) || stock < 0) {
+  alert("O stock deve ser um número inteiro igual ou superior a zero.");
+  return;
+}
+
+if (!category_id || !Number.isInteger(Number(category_id))) {
+  alert("Selecciona uma categoria válida.");
+  return;
+}
   let image_url = null;
 
 if (imageFile) {
@@ -376,8 +478,8 @@ if (imageFile) {
     return;
   }
 
-  const filePath = `${Date.now()}-${imageFile.name}`;
-
+  const fileExtension = imageFile.name.split(".").pop().toLowerCase();
+const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExtension}`;
   const { error: uploadError } = await supabaseClient
     .storage
     .from("produtos")
@@ -404,7 +506,7 @@ if (imageFile) {
       price,
       stock,
       image_url: image_url || null,
-      category_id,
+      category_id: Number(category_id),
       is_promotion,
       is_available
     }]);
@@ -560,7 +662,8 @@ imageInput.style.zIndex = "99999";
   const isPromotion = promotionAnswer.trim().toLowerCase() === "sim";
   const isAvailable = availableAnswer.trim().toLowerCase() === "sim";
   if (imageFile) {
-  const filePath = `${Date.now()}-${imageFile.name}`;
+  const fileExtension = imageFile.name.split(".").pop().toLowerCase();
+const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExtension}`;
 
   const { error: uploadError } = await supabaseClient
     .storage
@@ -612,8 +715,12 @@ imageInput.style.zIndex = "99999";
 
   if (answer === null) return;
 
-  const quantity = Number(answer);
+   const quantity = Number(answer.trim());
 
+if (answer.trim() === "") {
+  alert("Indica a quantidade em stock.");
+  return;
+} 
   if (!Number.isInteger(quantity) || quantity < 0) {
     alert("Introduz uma quantidade inteira igual ou superior a zero.");
     return;
@@ -632,6 +739,26 @@ imageInput.style.zIndex = "99999";
   alert("Stock atualizado com sucesso!");
   await loadAdminData();
 }
+  async function deleteProduct(id) {
+  const confirmed = confirm(
+    "Tens a certeza de que pretendes eliminar este produto?"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await supabaseClient
+    .from("products")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Não foi possível eliminar o produto: " + error.message);
+    return;
+  }
+
+  alert("Produto eliminado com sucesso!");
+  await loadAdminData();
+  }
   async function updateOrderStatus(id, newStatus) {
   const { error } = await supabaseClient.rpc(
     "update_order_status_with_stock",
