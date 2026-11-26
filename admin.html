@@ -395,7 +395,8 @@ async function addProduct() {
 
   await loadAdminData();
     }
-  async function editProduct(id) {
+  
+async function editProduct(id) {
   const { data: product, error } = await supabaseClient
     .from("products")
     .select("*")
@@ -410,50 +411,126 @@ async function addProduct() {
   const name = prompt("Nome do produto:", product.name);
   if (name === null) return;
 
-  const price = prompt("Preço do produto:", product.price);
-  if (price === null) return;
+  const priceText = prompt("Preço em Kz:", product.price);
+  if (priceText === null) return;
 
-  const description = prompt("Descrição:", product.description || "");
+  const price = Number(priceText);
+
+  if (!name.trim() || !Number.isFinite(price) || price <= 0) {
+    alert("Introduz um nome e um preço válido.");
+    return;
+  }
+
+  const description = prompt(
+    "Descrição do produto:",
+    product.description || ""
+  );
   if (description === null) return;
+
+  const imageUrl = prompt(
+    "URL da fotografia:",
+    product.image_url || ""
+  );
+  if (imageUrl === null) return;
+
+  const stockText = prompt(
+    "Quantidade em stock:",
+    product.stock ?? 0
+  );
+  if (stockText === null) return;
+
+  const stock = Number(stockText);
+
+  if (!Number.isInteger(stock) || stock < 0) {
+    alert("O stock deve ser um número inteiro igual ou superior a zero.");
+    return;
+  }
+
+  const categorySelect = document.getElementById("productCategory");
+
+  const categoryOptions = Array.from(categorySelect.options)
+    .filter(option => option.value !== "");
+
+  const categoryList = categoryOptions
+    .map(option => `${option.value} - ${option.textContent}`)
+    .join("\n");
+
+  const categoryId = prompt(
+    "Introduz o ID da nova categoria:\n\n" + categoryList,
+    String(product.category_id || "")
+  );
+
+  if (categoryId === null) return;
+
+  if (!categoryOptions.some(option => option.value === categoryId.trim())) {
+    alert("Selecciona um ID de categoria válido.");
+    return;
+  }
+
+  if (imageUrl.trim()) {
+    try {
+      const url = new URL(imageUrl.trim());
+
+      if (!["http:", "https:"].includes(url.protocol)) {
+        throw new Error("URL inválido");
+      }
+    } catch {
+      alert("Introduz um endereço válido para a fotografia.");
+      return;
+    }
+  }
+
+  const promotionAnswer = prompt(
+    "Produto em promoção? Escreve Sim ou Não:",
+    product.is_promotion ? "Sim" : "Não"
+  );
+
+  if (promotionAnswer === null) return;
+
+  if (!["sim", "não", "nao"].includes(promotionAnswer.trim().toLowerCase())) {
+    alert("Responde Sim ou Não para a promoção.");
+    return;
+  }
+
+  const availableAnswer = prompt(
+    "Produto disponível? Escreve Sim ou Não:",
+    product.is_available ? "Sim" : "Não"
+  );
+
+  if (availableAnswer === null) return;
+
+  if (!["sim", "não", "nao"].includes(availableAnswer.trim().toLowerCase())) {
+    alert("Responde Sim ou Não para a disponibilidade.");
+    return;
+  }
+
+  const isPromotion = promotionAnswer.trim().toLowerCase() === "sim";
+  const isAvailable = availableAnswer.trim().toLowerCase() === "sim";
 
   const { error: updateError } = await supabaseClient
     .from("products")
     .update({
       name: name.trim(),
-      price: Number(price),
-      description: description.trim()
+      price,
+      description: description.trim(),
+      image_url: imageUrl.trim() || null,
+      stock,
+      category_id: Number(categoryId.trim()),
+      is_promotion: isPromotion,
+      is_available: isAvailable
     })
     .eq("id", id);
 
   if (updateError) {
-    alert("Erro ao atualizar: " + updateError.message);
+    alert("Erro ao atualizar produto: " + updateError.message);
     return;
   }
 
   alert("Produto atualizado com sucesso!");
-  await loadAdminData();
-  }
-  async function deleteProduct(id) {
-  const confirmDelete = confirm(
-    "Tens a certeza de que pretendes eliminar este produto?"
-  );
-
-  if (!confirmDelete) return;
-
-  const { error } = await supabaseClient
-    .from("products")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert("Não foi possível eliminar o produto: " + error.message);
-    return;
-  }
-
-  alert("Produto eliminado com sucesso!");
 
   await loadAdminData();
-  }
+}
+
   async function updateProductStock(id, currentStock) {
   const answer = prompt(
     "Introduz a nova quantidade em stock:",
