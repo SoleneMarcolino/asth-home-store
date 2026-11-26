@@ -513,7 +513,12 @@ if (chooseImage) {
       resolve(file);
     };
 
-    imageInput.click();
+imageInput.style.display = "block";
+imageInput.style.position = "fixed";
+imageInput.style.top = "50%";
+imageInput.style.left = "50%";
+imageInput.style.transform = "translate(-50%, -50%)";
+imageInput.style.zIndex = "99999";
   });
 
   if (imageFile) {
