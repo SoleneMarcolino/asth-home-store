@@ -379,7 +379,15 @@ document.getElementById("ordersTable").innerHTML =
             <option value="Entregue" ${o.status === "Entregue" ? "selected" : ""}>Entregue</option>
           </select>
         </td>
-                <td>
+                        <td>
+          ${o.receipt_path
+            ? `<button type="button" onclick="viewCustomerReceipt('${o.id}')">
+                Ver comprovativo do cliente
+              </button>`
+            : "Aguardando comprovativo do cliente"}
+
+          <br>
+
           ${o.payment_status === "Pago" && o.receipt_number
             ? `<button type="button" onclick="generateCompanyReceipt('${o.id}')">
                 Gerar comprovativo
@@ -980,6 +988,34 @@ if (answer.trim() === "") {
   `);
 
   printWindow.document.close();
+  }
+  async function viewCustomerReceipt(orderId) {
+  const { data: order, error: orderError } = await supabaseClient
+    .from("orders")
+    .select("receipt_path")
+    .eq("id", orderId)
+    .single();
+
+  if (orderError || !order || !order.receipt_path) {
+    alert("Não foi possível encontrar o comprovativo do cliente.");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .storage
+    .from("Comprovativos")
+    .createSignedUrl(order.receipt_path, 60);
+
+  if (error || !data || !data.signedUrl) {
+    alert("Não foi possível abrir o comprovativo: " + (error?.message || "Erro desconhecido."));
+    return;
+  }
+
+  const opened = window.open(data.signedUrl, "_blank");
+
+  if (!opened) {
+    alert("O navegador bloqueou a abertura. Permite abrir janelas para consultar o comprovativo.");
+  }
   }
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, c => ({
