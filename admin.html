@@ -122,7 +122,7 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
   <label for="productStock">Quantidade em stock</label>
 <input type="number" id="productStock" placeholder="Ex.: 20 unidades" min="0" value="0">
 
-  <input type="url" id="productImage" placeholder="URL da fotografia">
+  <input type="file" id="productImage" accept="image/*">
 
   <select id="productCategory">
     <option value="">Selecionar categoria</option>
@@ -354,7 +354,7 @@ async function addProduct() {
   const description = document.getElementById("productDescription").value.trim();
   const price = Number(document.getElementById("productPrice").value);
   const stock = Number(document.getElementById("productStock").value);
-  const image_url = document.getElementById("productImage").value.trim();
+  const imageFile = document.getElementById("productImage").files[0];
   const category_id = document.getElementById("productCategory").value;
   const is_promotion = document.getElementById("productPromotion").checked;
   const is_available = document.getElementById("productAvailable").checked;
@@ -363,6 +363,38 @@ async function addProduct() {
     alert("Preenche o nome, o preço e a categoria do produto.");
     return;
   }
+  let image_url = null;
+
+if (imageFile) {
+  if (!imageFile.type.startsWith("image/")) {
+    alert("Selecciona um ficheiro de imagem válido.");
+    return;
+  }
+
+  if (imageFile.size > 5 * 1024 * 1024) {
+    alert("A fotografia não pode ultrapassar 5 MB.");
+    return;
+  }
+
+  const filePath = `${Date.now()}-${imageFile.name}`;
+
+  const { error: uploadError } = await supabaseClient
+    .storage
+    .from("produtos")
+    .upload(filePath, imageFile);
+
+  if (uploadError) {
+    alert("Erro ao carregar fotografia: " + uploadError.message);
+    return;
+  }
+
+  const { data: imageData } = supabaseClient
+    .storage
+    .from("produtos")
+    .getPublicUrl(filePath);
+
+  image_url = imageData.publicUrl;
+}
 
   const { error } = await supabaseClient
     .from("products")
@@ -427,11 +459,11 @@ async function editProduct(id) {
   );
   if (description === null) return;
 
-  const imageUrl = prompt(
-    "URL da fotografia:",
-    product.image_url || ""
-  );
-  if (imageUrl === null) return;
+  const imageInput = document.createElement("input");
+imageInput.type = "file";
+imageInput.accept = "image/*";
+
+let image_url = product.image_url || null;
 
   const stockText = prompt(
     "Quantidade em stock:",
@@ -466,20 +498,30 @@ async function editProduct(id) {
     alert("Selecciona um ID de categoria válido.");
     return;
   }
+  let imageFile = null;
+const chooseImage = confirm(
+  "Queres escolher uma nova fotografia para este produto?"
+);
 
-  if (imageUrl.trim()) {
-    try {
-      const url = new URL(imageUrl.trim());
+if (chooseImage) {
+  imageInput.click();
 
-      if (!["http:", "https:"].includes(url.protocol)) {
-        throw new Error("URL inválido");
-      }
-    } catch {
-      alert("Introduz um endereço válido para a fotografia.");
+  imageFile = await new Promise(resolve => {
+    imageInput.onchange = () => resolve(imageInput.files[0] || null);
+  });
+
+  if (imageFile) {
+    if (!imageFile.type.startsWith("image/")) {
+      alert("Selecciona uma imagem válida.");
+      return;
+    }
+
+    if (imageFile.size > 5 * 1024 * 1024) {
+      alert("A fotografia não pode ultrapassar 5 MB.");
       return;
     }
   }
-
+}
   const promotionAnswer = prompt(
     "Produto em promoção? Escreve Sim ou Não:",
     product.is_promotion ? "Sim" : "Não"
@@ -506,6 +548,26 @@ async function editProduct(id) {
 
   const isPromotion = promotionAnswer.trim().toLowerCase() === "sim";
   const isAvailable = availableAnswer.trim().toLowerCase() === "sim";
+  if (imageFile) {
+  const filePath = `${Date.now()}-${imageFile.name}`;
+
+  const { error: uploadError } = await supabaseClient
+    .storage
+    .from("produtos")
+    .upload(filePath, imageFile);
+
+  if (uploadError) {
+    alert("Erro ao carregar fotografia: " + uploadError.message);
+    return;
+  }
+
+  const { data: imageData } = supabaseClient
+    .storage
+    .from("produtos")
+    .getPublicUrl(filePath);
+
+  image_url = imageData.publicUrl;
+  }
 
   const { error: updateError } = await supabaseClient
     .from("products")
@@ -513,7 +575,7 @@ async function editProduct(id) {
       name: name.trim(),
       price,
       description: description.trim(),
-      image_url: imageUrl.trim() || null,
+      image_url: image_url,
       stock,
       category_id: Number(categoryId.trim()),
       is_promotion: isPromotion,
