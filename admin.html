@@ -504,10 +504,16 @@ const chooseImage = confirm(
 );
 
 if (chooseImage) {
-  imageInput.click();
+  document.body.appendChild(imageInput);
 
   imageFile = await new Promise(resolve => {
-    imageInput.onchange = () => resolve(imageInput.files[0] || null);
+    imageInput.onchange = () => {
+      const file = imageInput.files[0] || null;
+      imageInput.remove();
+      resolve(file);
+    };
+
+    imageInput.click();
   });
 
   if (imageFile) {
