@@ -503,6 +503,74 @@ function updatePurchaseTotal() {
   document.getElementById("purchaseTotal").textContent =
     "Total da compra: " + total.toLocaleString("pt-PT") + " Kz";
 }
+  async function savePurchase() {
+  const supplier = document.getElementById("purchaseSupplier").value.trim();
+  const date = document.getElementById("purchaseDate").value;
+  const notes = document.getElementById("purchaseNotes").value.trim();
+  const message = document.getElementById("purchaseMessage");
+  const button = document.querySelector(
+    '#purchaseFormContainer button[onclick="savePurchase()"]'
+  );
+
+  const rows = document.querySelectorAll(".purchase-item");
+
+  if (rows.length === 0) {
+    alert("Adiciona pelo menos um produto.");
+    return;
+  }
+
+  const items = [];
+
+  for (const row of rows) {
+    const productId = row.querySelector(".purchase-product").value;
+    const quantity = Number(row.querySelector(".purchase-quantity").value);
+    const unitCost = Number(row.querySelector(".purchase-cost").value);
+
+    if (!productId || !Number.isInteger(quantity) || quantity <= 0 ||
+        !Number.isFinite(unitCost) || unitCost < 0) {
+      alert("Verifica o produto, a quantidade e o custo de cada artigo.");
+      return;
+    }
+
+    items.push({
+      product_id: Number(productId),
+      quantity: quantity,
+      unit_cost: unitCost
+    });
+  }
+
+  button.disabled = true;
+  button.textContent = "A guardar...";
+
+  const { data, error } = await supabaseClient.rpc(
+    "register_asth_purchase",
+    {
+      p_supplier_name: supplier || null,
+      p_purchase_date: date || null,
+      p_notes: notes || null,
+      p_items: items
+    }
+  );
+
+  button.disabled = false;
+  button.textContent = "Guardar compra";
+
+  if (error) {
+    message.textContent = "Erro ao guardar: " + error.message;
+    alert("Não foi possível guardar a compra: " + error.message);
+    return;
+  }
+
+  alert("Compra registada com sucesso!");
+
+  document.getElementById("purchaseSupplier").value = "";
+  document.getElementById("purchaseNotes").value = "";
+  document.getElementById("purchaseItemsContainer").innerHTML = "";
+
+  hidePurchaseForm();
+
+  await loadAdminData();
+      }
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
