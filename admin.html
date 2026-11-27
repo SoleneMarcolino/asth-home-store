@@ -245,7 +245,32 @@ const SUPABASE_URL = "https://yipivcjqphceqtsfxpsl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_uztaOk3Mq4h6p46O_grDUg_ymdVKu30";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   console.log("ASTH: JavaScript carregado");
+async function verifyAdminSession() {
+  const { data: { session }, error } =
+    await supabaseClient.auth.getSession();
 
+  if (error || !session) {
+    return;
+  }
+
+  const { data: admin, error: adminError } = await supabaseClient
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", session.user.id)
+    .maybeSingle();
+
+  if (adminError || !admin) {
+    await supabaseClient.auth.signOut();
+    return;
+  }
+
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+
+  await loadAdminData();
+}
+
+verifyAdminSession();
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
@@ -287,6 +312,14 @@ async function loadAdminData() {
     alert("Não foi possível carregar todos os dados. Verifica a ligação.");
     return;
   }
+  document.getElementById("productCount").textContent =
+  products.data.length;
+
+document.getElementById("orderCount").textContent =
+  orders.data.length;
+
+document.getElementById("categoryCount").textContent =
+  categories.data.length;
   const orderIds = orders.data.map(o => o.id);
 
 let orderItems = [];
@@ -618,10 +651,15 @@ if (chooseImage) {
 
   imageFile = await new Promise(resolve => {
     imageInput.onchange = () => {
-      const file = imageInput.files[0] || null;
-      imageInput.remove();
-      resolve(file);
-    };
+  const file = imageInput.files[0] || null;
+  imageInput.remove();
+  resolve(file);
+};
+
+imageInput.oncancel = () => {
+  imageInput.remove();
+  resolve(null);
+};
 
 imageInput.style.display = "block";
 imageInput.style.position = "fixed";
