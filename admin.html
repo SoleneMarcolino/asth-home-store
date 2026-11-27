@@ -301,31 +301,34 @@ async function login() {
   await loadAdminData();
 } 
 let allAdminProducts = [];
+
 async function loadAdminData() {
-  alert("O botão foi accionado!");
   const products = await supabaseClient
-  .from("products")
-  .select("id,name,price,is_available,stock,is_promotion");
+    .from("products")
+    .select("id,name,price,is_available,stock,is_promotion");
 
-alert("Consulta de produtos concluída!");
   const orders = await supabaseClient
-  .from("orders")
-  .select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date,receipt_number,receipt_path");
+    .from("orders")
+    .select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date,receipt_number,receipt_path");
 
-alert("Consulta de encomendas concluída!");
-alert("As consultas foram concluídas!");
+  const categories = await supabaseClient
+    .from("categories")
+    .select("id,name");
+
   if (products.error || orders.error || categories.error) {
     alert("Não foi possível carregar todos os dados. Verifica a ligação.");
     return;
   }
+
   document.getElementById("productCount").textContent =
-  products.data.length;
+    products.data.length;
 
-document.getElementById("orderCount").textContent =
-  orders.data.length;
+  document.getElementById("orderCount").textContent =
+    orders.data.length;
 
-document.getElementById("categoryCount").textContent =
-  categories.data.length;
+  document.getElementById("categoryCount").textContent =
+    categories.data.length;
+
   const orderIds = orders.data.map(o => o.id);
 
 let orderItems = [];
