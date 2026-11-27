@@ -348,6 +348,56 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
 
   </div>
 </div>
+      <div class="card">
+  <h2>Despesas da ASTH</h2>
+  <p>Regista os pagamentos e gastos da loja.</p>
+
+  <button type="button" onclick="showExpenseForm()">
+    + Registar despesa
+  </button>
+
+  <div id="expenseFormContainer" style="display:none; margin-top:20px;">
+
+    <h3>Nova despesa</h3>
+
+    <label>Descrição</label>
+    <input type="text" id="expenseDescription"
+      placeholder="Ex.: Pagamento de internet">
+
+    <label>Categoria</label>
+    <select id="expenseCategory">
+      <option value="">Seleccionar categoria</option>
+      <option value="Transporte">Transporte</option>
+      <option value="Publicidade">Publicidade</option>
+      <option value="Comunicação">Comunicação</option>
+      <option value="Embalagens">Embalagens</option>
+      <option value="Operacional">Despesas operacionais</option>
+      <option value="Outros">Outros</option>
+    </select>
+
+    <label>Valor (Kz)</label>
+    <input type="number" id="expenseAmount"
+      min="1" step="0.01" placeholder="Valor da despesa">
+
+    <label>Data</label>
+    <input type="date" id="expenseDate">
+
+    <label>Observações</label>
+    <textarea id="expenseNotes"
+      placeholder="Observações adicionais"></textarea>
+
+    <button type="button" onclick="saveExpense()">
+      Guardar despesa
+    </button>
+
+    <button type="button" class="secondary"
+      onclick="hideExpenseForm()">
+      Cancelar
+    </button>
+
+    <p id="expenseMessage"></p>
+  </div>
+      </div>
   <div class="card">
     <h2>Investimento em mercadoria</h2>
     <p id="financeStockInvestment">A calcular...</p>
@@ -441,7 +491,67 @@ verifyAdminSession();
     addPurchaseItem();
   }
 }
+  function showExpenseForm() {
+  document.getElementById("expenseFormContainer").style.display = "block";
 
+  document.getElementById("expenseDate").value =
+    new Date().toISOString().split("T")[0];
+}
+
+function hideExpenseForm() {
+  document.getElementById("expenseFormContainer").style.display = "none";
+}
+  
+async function saveExpense() {
+  const description = document.getElementById("expenseDescription").value.trim();
+  const category = document.getElementById("expenseCategory").value;
+  const amount = Number(document.getElementById("expenseAmount").value);
+  const date = document.getElementById("expenseDate").value;
+  const notes = document.getElementById("expenseNotes").value.trim();
+  const message = document.getElementById("expenseMessage");
+
+  if (!description || !category || !Number.isFinite(amount) || amount <= 0 || !date) {
+    alert("Preenche a descrição, categoria, valor e data correctamente.");
+    return;
+  }
+
+  const button = document.querySelector(
+    '#expenseFormContainer button[onclick="saveExpense()"]'
+  );
+
+  button.disabled = true;
+  button.textContent = "A guardar...";
+
+  const { error } = await supabaseClient
+    .from("expenses")
+    .insert([{
+      description,
+      category,
+      amount,
+      expense_date: date,
+      notes: notes || null
+    }]);
+
+  button.disabled = false;
+  button.textContent = "Guardar despesa";
+
+  if (error) {
+    message.textContent = "Erro ao guardar: " + error.message;
+    alert("Não foi possível guardar a despesa: " + error.message);
+    return;
+  }
+
+  alert("Despesa registada com sucesso!");
+
+  document.getElementById("expenseDescription").value = "";
+  document.getElementById("expenseCategory").value = "";
+  document.getElementById("expenseAmount").value = "";
+  document.getElementById("expenseNotes").value = "";
+
+  hideExpenseForm();
+
+  await loadAdminData();
+}
 function hidePurchaseForm() {
   document.getElementById("purchaseFormContainer").style.display = "none";
 }
