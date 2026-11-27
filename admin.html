@@ -302,6 +302,7 @@ async function login() {
 } 
 let allAdminProducts = [];
 async function loadAdminData() {
+  alert("O botão foi accionado!");
   const [products, orders, categories] = await Promise.all([
     supabaseClient.from("products").select("id,name,price,is_available,stock,is_promotion"),
     supabaseClient.from("orders").select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date,receipt_number,receipt_path"),
