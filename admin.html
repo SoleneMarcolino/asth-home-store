@@ -303,11 +303,11 @@ async function login() {
 let allAdminProducts = [];
 async function loadAdminData() {
   alert("O botão foi accionado!");
-  const [products, orders, categories] = await Promise.all([
-    supabaseClient.from("products").select("id,name,price,is_available,stock,is_promotion"),
-    supabaseClient.from("orders").select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date,receipt_number,receipt_path"),
-    supabaseClient.from("categories").select("id,name")
-  ]);
+  const products = await supabaseClient
+  .from("products")
+  .select("id,name,price,is_available,stock,is_promotion");
+
+alert("Consulta de produtos concluída!");
 alert("As consultas foram concluídas!");
   if (products.error || orders.error || categories.error) {
     alert("Não foi possível carregar todos os dados. Verifica a ligação.");
