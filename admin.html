@@ -308,7 +308,7 @@ async function loadAdminData() {
     supabaseClient.from("orders").select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date,receipt_number,receipt_path"),
     supabaseClient.from("categories").select("id,name")
   ]);
-
+alert("As consultas foram concluídas!");
   if (products.error || orders.error || categories.error) {
     alert("Não foi possível carregar todos os dados. Verifica a ligação.");
     return;
