@@ -299,7 +299,55 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
       </div>
     </div>
   </div>
+<div class="card">
+  <h2>Compras de mercadoria</h2>
+  <p>Regista as compras efectuadas aos fornecedores e actualiza o stock.</p>
 
+  <button type="button" onclick="showPurchaseForm()">
+    + Registar compra
+  </button>
+
+  <div id="purchaseFormContainer" style="display:none; margin-top:20px;">
+
+  <h3>Nova compra</h3>
+
+  <label>Nome do fornecedor</label>
+  <input type="text" id="purchaseSupplier"
+    placeholder="Nome do fornecedor">
+
+  <label>Data da compra</label>
+  <input type="date" id="purchaseDate">
+
+  <label>Observações</label>
+  <textarea id="purchaseNotes"
+    placeholder="Observações sobre a compra"></textarea>
+
+  <hr>
+
+  <h3>Produtos comprados</h3>
+
+  <div id="purchaseItemsContainer"></div>
+
+  <button type="button" class="secondary"
+    onclick="addPurchaseItem()">
+    + Adicionar produto
+  </button>
+
+  <p id="purchaseTotal">Total da compra: 0 Kz</p>
+
+  <button type="button" onclick="savePurchase()">
+    Guardar compra
+  </button>
+
+  <button type="button" class="secondary"
+    onclick="hidePurchaseForm()">
+    Cancelar
+  </button>
+
+  <p id="purchaseMessage"></p>
+
+  </div>
+</div>
   <div class="card">
     <h2>Investimento em mercadoria</h2>
     <p id="financeStockInvestment">A calcular...</p>
@@ -384,6 +432,77 @@ verifyAdminSession();
     selectedScreen.classList.add("active");
   }
   }
+  function showPurchaseForm() {
+  document.getElementById("purchaseFormContainer").style.display = "block";
+  document.getElementById("purchaseDate").value =
+    new Date().toISOString().split("T")[0];
+
+  if (document.getElementById("purchaseItemsContainer").children.length === 0) {
+    addPurchaseItem();
+  }
+}
+
+function hidePurchaseForm() {
+  document.getElementById("purchaseFormContainer").style.display = "none";
+}
+
+function addPurchaseItem() {
+  const container = document.getElementById("purchaseItemsContainer");
+
+  if (!allAdminProducts || allAdminProducts.length === 0) {
+    alert("Não existem produtos disponíveis para seleccionar.");
+    return;
+  }
+
+  const row = document.createElement("div");
+  row.className = "purchase-item";
+  row.style.marginBottom = "15px";
+  row.style.padding = "12px";
+  row.style.border = "1px solid #ddd";
+  row.style.borderRadius = "8px";
+
+  row.innerHTML = `
+    <label>Produto</label>
+    <select class="purchase-product" onchange="updatePurchaseTotal()">
+      <option value="">Seleccionar produto</option>
+      ${allAdminProducts.map(p => `
+        <option value="${p.id}">${escapeHTML(p.name)}</option>
+      `).join("")}
+    </select>
+
+    <label>Quantidade</label>
+    <input type="number" class="purchase-quantity"
+      min="1" step="1" value="1"
+      oninput="updatePurchaseTotal()">
+
+    <label>Custo unitário (Kz)</label>
+    <input type="number" class="purchase-cost"
+      min="0" step="0.01" value="0"
+      oninput="updatePurchaseTotal()">
+
+    <button type="button" class="secondary"
+      onclick="this.parentElement.remove(); updatePurchaseTotal();">
+      Remover produto
+    </button>
+  `;
+
+  container.appendChild(row);
+  updatePurchaseTotal();
+}
+
+function updatePurchaseTotal() {
+  let total = 0;
+
+  document.querySelectorAll(".purchase-item").forEach(row => {
+    const quantity = Number(row.querySelector(".purchase-quantity").value) || 0;
+    const cost = Number(row.querySelector(".purchase-cost").value) || 0;
+
+    total += quantity * cost;
+  });
+
+  document.getElementById("purchaseTotal").textContent =
+    "Total da compra: " + total.toLocaleString("pt-PT") + " Kz";
+}
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
