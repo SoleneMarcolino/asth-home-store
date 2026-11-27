@@ -115,6 +115,27 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
     box-sizing: border-box;
   }
               }
+  /* Navegação da administração */
+.admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.admin-nav button {
+  flex: 1;
+  min-width: 110px;
+}
+
+/* Separação dos ecrãs */
+.admin-screen {
+  display: none;
+}
+
+.admin-screen.active {
+  display: block;
+}
 </style>
 </head>
 <body>
@@ -139,13 +160,22 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
       <p>ASTH Home Store — Sua casa, nossa paixão.</p>
       <button class="secondary" onclick="logout()">Terminar sessão</button>
     </div>
-
+    <nav class="admin-nav">
+      <button onclick="showAdminScreen('overview')">Painel</button>
+      <button onclick="showAdminScreen('products')">Produtos</button>
+      <button onclick="showAdminScreen('orders')">Encomendas</button>
+      <button onclick="showAdminScreen('categories')">Categorias</button>
+      <button onclick="showAdminScreen('settings')">Definições</button>
+    </nav>
+    <div id="screen-overview" class="admin-screen">
     <div class="stats">
       <div class="stat">Produtos<strong id="productCount">0</strong></div>
       <div class="stat">Encomendas<strong id="orderCount">0</strong></div>
       <div class="stat">Categorias<strong id="categoryCount">0</strong></div>
-    </div>
+        </div>
+  </div>
 
+  <div id="screen-products" class="admin-screen">
     <div class="card">
       <h2>Produtos</h2>
       <button onclick="loadAdminData()">Actualizar dados</button>
@@ -216,8 +246,11 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
       </div>
     </div>
 
-    <div class="card">
-      <h2>Encomendas</h2>
+    </div>
+
+<div id="screen-orders" class="admin-screen">
+  <div class="card">
+    <h2>Encomendas</h2>
       <div class="table-wrap">
         <table>
           <thead>
@@ -235,8 +268,38 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
           </thead>
           <tbody id="ordersTable"></tbody>
         </table>
+              </div>
+    </div>
+</div>
+    <div id="screen-categories" class="admin-screen">
+      <div class="card">
+        <h2>Categorias</h2>
+        <p>Área de organização das categorias dos produtos.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome da categoria</th>
+              </tr>
+            </thead>
+            <tbody id="categoriesTable"></tbody>
+          </table>
+        </div>
       </div>
     </div>
+      <div id="screen-settings" class="admin-screen">
+      <div class="card">
+        <h2>Definições</h2>
+        <p>ASTH Home Store</p>
+        <p>Sua casa, nossa paixão.</p>
+        <p>Área de informações e configurações da administração.</p>
+        <button class="secondary" onclick="logout()">
+          Terminar sessão
+        </button>
+      </div>
+      </div>
   </section>
 </main>
 
@@ -271,6 +334,17 @@ async function verifyAdminSession() {
 }
 
 verifyAdminSession();
+  function showAdminScreen(screen) {
+  document.querySelectorAll(".admin-screen").forEach(element => {
+    element.classList.remove("active");
+  });
+
+  const selectedScreen = document.getElementById("screen-" + screen);
+
+  if (selectedScreen) {
+    selectedScreen.classList.add("active");
+  }
+  }
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
@@ -353,6 +427,13 @@ categorySelect.innerHTML =
   categories.data.map(c =>
     `<option value="${c.id}">${escapeHTML(c.name)}</option>`
   ).join("");
+  document.getElementById("categoriesTable").innerHTML =
+  categories.data.map(c => `
+    <tr>
+      <td>${c.id}</td>
+      <td>${escapeHTML(c.name)}</td>
+    </tr>
+  `).join("");
   
 allAdminProducts = products.data || [];
 filterProducts();
@@ -441,7 +522,6 @@ document.getElementById("ordersTable").innerHTML =
   }).join("");
 }
   function filterProducts() {
-    alert("A pesquisa foi accionada!");
   const search = document.getElementById("productSearch").value
     .trim()
     .toLowerCase();
