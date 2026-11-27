@@ -2055,6 +2055,8 @@ document.getElementById("consulta-form").addEventListener("submit", async functi
     resultado.textContent = "Não encontrámos uma encomenda com essa referência e telefone. Verifique os dados e tente novamente.";
     return;
   }
+  checkoutOrderReference = referencia;
+checkoutOrderPhone = telefone;
 
   
 resultado.replaceChildren();
@@ -2195,18 +2197,90 @@ if (data.receipt_number) {
   );
 }
 
-if (data.receipt_uploaded) {
-  adicionarTexto(
-    "div",
-    "comprovativo",
-    "Comprovativo de pagamento: Enviado. Aguarda confirmação."
-  );
-} else {
-  adicionarTexto(
-    "div",
-    "comprovativo",
-    "Comprovativo de pagamento: Ainda não enviado."
-  );
+if (!data.receipt_uploaded) {
+  const formularioConsulta = document.createElement("form");
+  formularioConsulta.id = "consulta-receipt-form";
+
+  formularioConsulta.innerHTML = `
+    <label for="consulta-receipt-file">
+      Enviar comprovativo (JPG, PNG ou PDF)
+    </label>
+
+    <input
+      type="file"
+      id="consulta-receipt-file"
+      accept="image/jpeg,image/png,application/pdf"
+      required
+    >
+
+    <button type="submit">Enviar comprovativo</button>
+
+    <p id="consulta-receipt-status"></p>
+  `;
+
+  formularioConsulta.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const ficheiro = document.getElementById("consulta-receipt-file").files[0];
+    const estado = document.getElementById("consulta-receipt-status");
+    const botao = this.querySelector('button[type="submit"]');
+
+    if (!checkoutOrderReference || !checkoutOrderPhone) {
+      estado.textContent = "Não foi possível identificar a encomenda.";
+      return;
+    }
+
+    if (!ficheiro) {
+      estado.textContent = "Seleccione o comprovativo.";
+      return;
+    }
+
+    if (ficheiro.size > 5 * 1024 * 1024) {
+      estado.textContent = "O ficheiro não pode ultrapassar 5 MB.";
+      return;
+    }
+
+    const formatos = ["image/jpeg", "image/png", "application/pdf"];
+
+    if (!formatos.includes(ficheiro.type)) {
+      estado.textContent = "Envie um ficheiro JPG, PNG ou PDF.";
+      return;
+    }
+
+    const formulario = new FormData();
+    formulario.append("reference", checkoutOrderReference);
+    formulario.append("phone", checkoutOrderPhone);
+    formulario.append("file", ficheiro);
+
+    estado.textContent = "A enviar o comprovativo...";
+    botao.disabled = true;
+
+    try {
+      const { data, error } = await supabaseClient.functions.invoke(
+        "asth-comprovativos",
+        {
+          body: formulario
+        }
+      );
+
+      if (error) {
+        console.error(error);
+        estado.textContent = "Não foi possível enviar. Tente novamente.";
+        return;
+      }
+
+      estado.textContent = data.message || "Comprovativo recebido com sucesso!";
+      this.reset();
+
+    } catch (error) {
+      console.error(error);
+      estado.textContent = "Ocorreu um erro ao enviar o comprovativo.";
+    } finally {
+      botao.disabled = false;
+    }
+  });
+
+  card.appendChild(formularioConsulta);
 }
 
 resultado.appendChild(card);
