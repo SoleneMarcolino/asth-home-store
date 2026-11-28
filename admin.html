@@ -543,9 +543,12 @@ async function saveExpense() {
   );
 
   button.disabled = true;
-  button.textContent = "A guardar...";
+button.textContent = "A guardar...";
 
-  const { error } = await supabaseClient
+let error;
+
+try {
+  const result = await supabaseClient
     .from("expenses")
     .insert([{
       description,
@@ -555,9 +558,15 @@ async function saveExpense() {
       notes: notes || null
     }]);
 
+  error = result.error;
+
+} catch (err) {
+  error = err;
+
+} finally {
   button.disabled = false;
   button.textContent = "Guardar despesa";
-
+}
   if (error) {
     message.textContent = "Erro ao guardar: " + error.message;
     alert("Não foi possível guardar a despesa: " + error.message);
@@ -1454,15 +1463,37 @@ if (answer.trim() === "") {
     return;
   }
 
-  const updates = {
-    [field]: value
-  };
+  let currentOrder = null;
 
-  if (field === "payment_status") {
-    updates.payment_date = value === "Pago"
-      ? new Date().toISOString()
-      : null;
+if (field === "payment_status") {
+  const { data, error: fetchError } = await supabaseClient
+    .from("orders")
+    .select("payment_status, payment_date")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) {
+    alert("Erro ao consultar pagamento: " + fetchError.message);
+    await loadAdminData();
+    return;
   }
+
+  currentOrder = data;
+}
+
+const updates = {
+  [field]: value
+};
+
+if (field === "payment_status") {
+  if (value === "Pago" && currentOrder.payment_status !== "Pago") {
+    updates.payment_date = new Date().toISOString();
+  }
+
+  if (value === "Pendente") {
+    updates.payment_date = null;
+  }
+}
 
   const { error } = await supabaseClient
     .from("orders")
