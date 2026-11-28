@@ -596,7 +596,7 @@ function addPurchaseItem() {
 
   row.innerHTML = `
     <label>Produto</label>
-    <select class="purchase-product" onchange="updatePurchaseTotal()">
+    <select class="purchase-product" onchange="fillPurchaseCost(this); updatePurchaseTotal()">
       <option value="">Seleccionar produto</option>
       ${allAdminProducts.map(p => `
         <option value="${p.id}">${escapeHTML(p.name)}</option>
@@ -622,7 +622,21 @@ function addPurchaseItem() {
   container.appendChild(row);
   updatePurchaseTotal();
 }
+function fillPurchaseCost(select) {
+  const row = select.closest(".purchase-item");
+  const productId = Number(select.value);
 
+  const product = allAdminProducts.find(
+    p => Number(p.id) === productId
+  );
+
+  if (product) {
+    row.querySelector(".purchase-cost").value =
+      Number(product.cost_price || 0);
+  } else {
+    row.querySelector(".purchase-cost").value = "0";
+  }
+}
 function updatePurchaseTotal() {
   let total = 0;
 
@@ -673,9 +687,12 @@ function updatePurchaseTotal() {
   }
 
   button.disabled = true;
-  button.textContent = "A guardar...";
+button.textContent = "A guardar...";
 
-  const { data, error } = await supabaseClient.rpc(
+let data, error;
+
+try {
+  const result = await supabaseClient.rpc(
     "register_asth_purchase",
     {
       p_supplier_name: supplier || null,
@@ -685,8 +702,16 @@ function updatePurchaseTotal() {
     }
   );
 
+  data = result.data;
+  error = result.error;
+
+} catch (err) {
+  error = err;
+
+} finally {
   button.disabled = false;
   button.textContent = "Guardar compra";
+}
 
   if (error) {
     message.textContent = "Erro ao guardar: " + error.message;
