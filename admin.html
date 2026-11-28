@@ -750,9 +750,15 @@ const expenses = await supabaseClient
   .from("expenses")
   .select("id,description,category,amount,expense_date,notes");
 
-  if (products.error || orders.error || categories.error) {
-    alert("Não foi possível carregar todos os dados. Verifica a ligação.");
-    return;
+  if (
+  products.error ||
+  orders.error ||
+  categories.error ||
+  purchases.error ||
+  expenses.error
+) {
+  alert("Não foi possível carregar todos os dados. Verifica a ligação.");
+  return;
   }
 
   document.getElementById("productCount").textContent =
@@ -897,8 +903,12 @@ if (financeMovements.length === 0) {
 } else {
   financeHistoryTable.innerHTML = financeMovements.map(m => {
     const date = m.date
-      ? new Date(m.date).toLocaleDateString("pt-PT")
-      : "—";
+  ? (
+      /^\d{4}-\d{2}-\d{2}$/.test(m.date)
+        ? new Date(m.date + "T12:00:00").toLocaleDateString("pt-PT")
+        : new Date(m.date).toLocaleDateString("pt-PT")
+    )
+  : "—";
 
     const amount = Math.abs(m.amount).toLocaleString("pt-PT") + " Kz";
     const sign = m.amount >= 0 ? "+" : "−";
