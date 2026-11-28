@@ -209,6 +209,8 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
   <textarea id="productDescription" placeholder="Descrição do produto"></textarea>
 
   <input type="number" id="productPrice" placeholder="Preço em Kz">
+  <label for="productCost">Custo de aquisição por unidade (Kz)</label>
+<input type="number" id="productCost" placeholder="Ex.: 2500" min="0" step="0.01" value="0">
   <label for="productStock">Quantidade em stock</label>
 <input type="number" id="productStock" placeholder="Ex.: 20 unidades" min="0" value="0">
 
@@ -1062,6 +1064,7 @@ async function addProduct() {
   const name = document.getElementById("productName").value.trim();
   const description = document.getElementById("productDescription").value.trim();
   const price = Number(document.getElementById("productPrice").value);
+  const cost_price = Number(document.getElementById("productCost").value);
   const stock = Number(document.getElementById("productStock").value);
   const imageFile = document.getElementById("productImage").files[0];
   const category_id = document.getElementById("productCategory").value;
@@ -1126,6 +1129,7 @@ const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt
       name,
       description,
       price,
+      cost_price,
       stock,
       image_url: image_url || null,
       category_id: Number(category_id),
@@ -1143,6 +1147,7 @@ const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt
   document.getElementById("productName").value = "";
   document.getElementById("productDescription").value = "";
   document.getElementById("productPrice").value = "";
+  document.getElementById("productCost").value = "0";
   document.getElementById("productStock").value = "0";
   document.getElementById("productImage").value = "";
   document.getElementById("productCategory").value = "";
