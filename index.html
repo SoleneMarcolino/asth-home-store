@@ -1600,7 +1600,7 @@ let selectedCategory = "";
 async function loadProducts() {
   const { data, error } = await supabaseClient
     .from('products')
-    .select('id, name, description, price, image_url, is_promotion, is_available, category_id, created_at, cost_price')
+    .select('id, name, description, price, image_url, is_promotion, is_available, category_id, created_at')
     .eq('is_available', true);
 
   const { data: categoriesData, error: categoriesError } = await supabaseClient
