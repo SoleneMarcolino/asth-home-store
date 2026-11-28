@@ -404,8 +404,26 @@ th,td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
   </div>
 
   <div class="card">
-    <h2>Movimentos financeiros</h2>
-    <p>O histórico de compras, despesas e recebimentos será apresentado aqui.</p>
+  <h2>Histórico financeiro</h2>
+  <p>Consulta os movimentos financeiros da ASTH.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Movimento</th>
+          <th>Descrição</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody id="financeHistoryTable">
+        <tr>
+          <td colspan="4">A carregar movimentos...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   </div>
     </div>
     <div id="screen-categories" class="admin-screen">
@@ -719,7 +737,7 @@ async function loadAdminData() {
 
   const orders = await supabaseClient
     .from("orders")
-    .select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date,receipt_number,receipt_path");
+      .select("id,customer_name,total,status,phone,address,delivery_date,payment_method,payment_status,payment_date,receipt_number,receipt_path,created_at");
 
   const categories = await supabaseClient
     .from("categories")
@@ -836,6 +854,65 @@ document.getElementById("financeProfit").textContent =
 
 document.getElementById("financeStockInvestment").textContent =
   stockInvestment.toLocaleString("pt-PT") + " Kz";
+  const financeMovements = [];
+
+(orders.data || [])
+  .filter(o => o.payment_status === "Pago")
+  .forEach(o => {
+    financeMovements.push({
+      date: o.payment_date || o.created_at,
+      type: "Recebimento",
+      description: "Venda - " + (o.customer_name || "Cliente"),
+      amount: Number(o.total || 0)
+    });
+  });
+
+(purchases.data || []).forEach(p => {
+  financeMovements.push({
+    date: p.purchase_date,
+    type: "Compra",
+    description: "Fornecedor - " + (p.supplier_name || "Não indicado"),
+    amount: -Number(p.total || 0)
+  });
+});
+
+(expenses.data || []).forEach(e => {
+  financeMovements.push({
+    date: e.expense_date,
+    type: "Despesa",
+    description: e.description,
+    amount: -Number(e.amount || 0)
+  });
+});
+
+financeMovements.sort((a, b) =>
+  new Date(b.date || 0) - new Date(a.date || 0)
+);
+
+const financeHistoryTable = document.getElementById("financeHistoryTable");
+
+if (financeMovements.length === 0) {
+  financeHistoryTable.innerHTML =
+    '<tr><td colspan="4">Ainda não existem movimentos financeiros.</td></tr>';
+} else {
+  financeHistoryTable.innerHTML = financeMovements.map(m => {
+    const date = m.date
+      ? new Date(m.date).toLocaleDateString("pt-PT")
+      : "—";
+
+    const amount = Math.abs(m.amount).toLocaleString("pt-PT") + " Kz";
+    const sign = m.amount >= 0 ? "+" : "−";
+
+    return `
+      <tr>
+        <td>${date}</td>
+        <td>${m.type}</td>
+        <td>${escapeHTML(m.description)}</td>
+        <td>${sign}${amount}</td>
+      </tr>
+    `;
+  }).join("");
+  }
 allAdminProducts = products.data || [];
 filterProducts();
 
