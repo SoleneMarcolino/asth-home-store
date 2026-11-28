@@ -1600,7 +1600,7 @@ let selectedCategory = "";
 async function loadProducts() {
   const { data, error } = await supabaseClient
     .from('products')
-    .select('id, name, description, price, image_url, is_promotion, is_available, category_id,created_at')
+    .select('id, name, description, price, image_url, is_promotion, is_available, category_id, created_at, cost_price')
     .eq('is_available', true);
 
   const { data: categoriesData, error: categoriesError } = await supabaseClient
@@ -1985,12 +1985,13 @@ async function sendOrder(event) {
 checkoutOrderPhone = order.phone;
 
   const orderItems = cart.map(p => ({
-    order_id: savedOrder.id,
-    product_id: p.id,
-    product_name: p.name,
-    quantity: p.quantity,
-    unit_price: p.price
-  }));
+  order_id: savedOrder.id,
+  product_id: p.id,
+  product_name: p.name,
+  quantity: p.quantity,
+  unit_price: p.price,
+  unit_cost: Number(p.cost_price || 0)
+}));
 
   const { error: itemsError } = await supabaseClient
     .from("order_items")
