@@ -1043,6 +1043,15 @@ document.getElementById("ordersTable").innerHTML =
                 Gerar comprovativo
               </button>`
             : "Disponível após confirmação do pagamento"}
+            <br><br>
+
+${o.payment_status !== "Pago" &&
+  !["Cancelada", "Enviada", "Entregue"].includes(o.status)
+  ? `<button type="button" class="secondary"
+      onclick="cancelOrder('${o.id}')">
+      Cancelar encomenda
+    </button>`
+  : ""}
         </td>
       </tr>
     `;
@@ -1455,6 +1464,32 @@ if (answer.trim() === "") {
   }
 
   alert("Estado da encomenda atualizado com sucesso!");
+  await loadAdminData();
+  }
+  async function cancelOrder(id) {
+  const confirmed = confirm(
+    "Tens a certeza de que pretendes cancelar esta encomenda? Esta operação não pode ser desfeita."
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const { data, error } = await supabaseClient.rpc(
+    "cancel_asth_order",
+    {
+      p_order_id: Number(id)
+    }
+  );
+
+  if (error) {
+    alert("Não foi possível cancelar a encomenda: " + error.message);
+    await loadAdminData();
+    return;
+  }
+
+  alert(data || "Encomenda cancelada com sucesso!");
+
   await loadAdminData();
   }
   async function updateOrderPayment(id, field, value) {
