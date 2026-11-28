@@ -1173,6 +1173,19 @@ async function editProduct(id) {
     alert("Introduz um nome e um preço válido.");
     return;
   }
+  const costText = prompt(
+  "Custo de aquisição do produto (Kz):",
+  product.cost_price ?? 0
+);
+
+if (costText === null) return;
+
+const cost_price = Number(costText);
+
+if (!Number.isFinite(cost_price) || cost_price < 0) {
+  alert("O custo de aquisição deve ser igual ou superior a zero.");
+  return;
+}
 
   const description = prompt(
     "Descrição do produto:",
@@ -1312,6 +1325,7 @@ const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt
     .update({
       name: name.trim(),
       price,
+      cost_price,
       description: description.trim(),
       image_url: image_url,
       stock,
