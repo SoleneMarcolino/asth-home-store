@@ -1989,8 +1989,7 @@ checkoutOrderPhone = order.phone;
   product_id: p.id,
   product_name: p.name,
   quantity: p.quantity,
-  unit_price: p.price,
-  unit_cost: Number(p.cost_price || 0)
+  unit_price: p.price
 }));
 
   const { error: itemsError } = await supabaseClient
